@@ -3,14 +3,7 @@ import { useAuthStore } from "@/store/auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { applicationsApi, type Application } from "@/api/applications";
 import { Link, useNavigate } from "react-router-dom";
-
-const statusMap: Record<string, { label: string; color: string }> = {
-  interested: { label: "已关注", color: "bg-gray-100 text-gray-800" },
-  applied: { label: "已报名", color: "bg-yellow-100 text-yellow-800" },
-  interview: { label: "面试中", color: "bg-blue-100 text-blue-800" },
-  offer: { label: "已录取", color: "bg-green-100 text-green-800" },
-  rejected: { label: "未获录", color: "bg-red-100 text-red-800" },
-};
+import { useTranslation } from "react-i18next";
 
 export default function TrackingPage() {
   const { currentChildId } = useAuthStore();
@@ -18,7 +11,15 @@ export default function TrackingPage() {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  const { data: applications, isLoading } = useQuery({
+  const statusMap: Record<string, { label: string; color: string }> = {
+    interested: { label: t('status.interested'), color: "bg-gray-100 text-gray-800" },
+    applied: { label: t('status.applied'), color: "bg-yellow-100 text-yellow-800" },
+    interview: { label: t('status.interview'), color: "bg-blue-100 text-blue-800" },
+    offer: { label: t('status.offer'), color: "bg-green-100 text-green-800" },
+    rejected: { label: t('status.rejected'), color: "bg-red-100 text-red-800" },
+  };
+
+  const { data: applications, isLoading, isError } = useQuery({
     queryKey: ["applications", currentChildId],
     queryFn: () => currentChildId ? applicationsApi.list(currentChildId) : null,
     enabled: !!currentChildId,
@@ -31,6 +32,20 @@ export default function TrackingPage() {
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
   });
+
+  if (isError) {
+    return (
+      <div className="p-4 text-center mt-10">
+        <p className="text-red-500 mb-4">{t('common.error')}</p>
+        <button 
+          onClick={() => queryClient.invalidateQueries({ queryKey: ["applications"] })}
+          className="text-primary underline"
+        >
+          {t('common.retry') || 'Retry'}
+        </button>
+      </div>
+    );
+  }
 
   if (!currentChildId) {
     return (
@@ -64,7 +79,7 @@ export default function TrackingPage() {
                   <span>{app.school?.name_cn || app.school?.name_en}</span>
                   <div onClick={(e) => e.stopPropagation()}>
                     <select
-                      className={`text-xs px-2 py-1 rounded-full font-normal border-0 ${statusMap[app.status]?.color} cursor-pointer focus:ring-0 appearance-none pr-6 relative`}
+                      className={`text-xs px-2 py-1 rounded-full font-normal border-0 ${statusMap[app.status]?.color || 'bg-gray-100'} cursor-pointer focus:ring-0 appearance-none pr-6 relative`}
                       value={app.status}
                       onChange={(e) => {
                         updateMutation.mutate({ id: app.id, status: e.target.value });
