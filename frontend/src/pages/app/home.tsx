@@ -10,10 +10,12 @@ import { applicationsApi } from "@/api/applications";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChildSwitcher } from "@/components/mobile/child-switcher";
+import { useTranslation } from "react-i18next";
 
 import { User } from "lucide-react";
 
 export default function HomePage() {
+  const { t } = useTranslation();
   const { currentChildId } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("");
@@ -153,7 +155,7 @@ export default function HomePage() {
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
           <Input 
             className="pl-9 bg-gray-50 border-none shadow-sm h-9" 
-            placeholder="搜索学校..." 
+            placeholder={t('home.search_placeholder')}
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -212,15 +214,15 @@ export default function HomePage() {
         {/* School List */}
         <section className="space-y-3">
           <h2 className="text-lg font-bold text-gray-900">
-            {searchQuery || activeFilter ? "筛选结果" : (isFallback ? "热门学校" : "为您推荐")}
+            {searchQuery || activeFilter ? t('home.filter_results') : (isFallback ? t('home.popular_schools') : t('home.recommended_for_you'))}
           </h2>
           
           <div className="space-y-3">
             {isLoadingMatches ? (
-               <div className="text-center text-sm text-gray-500 py-8">
-                 <div className="animate-spin h-6 w-6 border-2 border-indigo-600 border-t-transparent rounded-full mx-auto mb-2"></div>
-                 加载中...
-               </div>
+              <div className="text-center text-sm text-gray-500 py-8">
+                <div className="animate-spin h-6 w-6 border-2 border-indigo-600 border-t-transparent rounded-full mx-auto mb-2"></div>
+                {t('home.loading')}
+              </div>
             ) : displaySchools?.map((school) => {
               const isTracked = trackedSchoolIds.has(school.id);
               return (

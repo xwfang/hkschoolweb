@@ -5,10 +5,12 @@ import { useAuthStore } from "@/store/auth";
 import { useQuery } from "@tanstack/react-query";
 import { childrenApi } from "@/api/children";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function ProfilePage() {
   const { user, logout, setCurrentChildId } = useAuthStore();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const { data: children, isLoading } = useQuery({
     queryKey: ["children"],
@@ -34,17 +36,17 @@ export default function ProfilePage() {
 
       <div className="space-y-4">
         <div className="flex justify-between items-center px-1">
-          <h3 className="text-md font-semibold">我的子女</h3>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+          <h3 className="text-md font-semibold">{t('profile.children')}</h3>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => navigate("/app/profile/add-child")}>
             <Plus className="h-4 w-4" />
           </Button>
         </div>
 
         {isLoading ? (
-          <div className="text-center text-sm text-gray-500 py-4">加载中...</div>
+          <div className="text-center text-sm text-gray-500 py-4">{t('common.loading')}</div>
         ) : children?.length === 0 ? (
           <div className="text-center text-sm text-gray-500 py-4 border rounded-lg border-dashed">
-            暂无子女档案，请添加
+            {t('profile.add_child')}
           </div>
         ) : (
           children?.map((child) => (
@@ -58,7 +60,7 @@ export default function ProfilePage() {
                     </span>
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    年级: {child.current_grade} {child.target_grade ? `-&gt; ${child.target_grade}` : ""} | 目标: {child.target_districts}
+                    年级: {child.current_grade} {child.target_grade ? `-> ${child.target_grade}` : ""} | 目标: {child.target_districts}
                   </p>
                 </div>
                 <Button variant="outline" size="sm">编辑</Button>
@@ -67,13 +69,17 @@ export default function ProfilePage() {
           ))
         )}
         
-        <Button className="w-full" variant="outline" onClick={() => navigate("/app/profile/add-child")}>添加子女</Button>
+        <Button className="w-full" variant="outline" onClick={() => navigate("/app/profile/add-child")}>{t('profile.add_child')}</Button>
       </div>
 
       <div className="space-y-2 pt-4">
-        <Button variant="ghost" className="w-full justify-start gap-2">
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start gap-2"
+          onClick={() => navigate("/app/profile/settings")}
+        >
           <Settings className="h-4 w-4" />
-          设置
+          {t('profile.settings')}
         </Button>
         <Button 
           variant="ghost" 
@@ -81,7 +87,7 @@ export default function ProfilePage() {
           onClick={handleLogout}
         >
           <LogOut className="h-4 w-4" />
-          退出登录
+          {t('profile.logout')}
         </Button>
       </div>
     </div>

@@ -9,6 +9,7 @@ import ProfilePage from "./pages/app/profile";
 import AddChildPage from "@/pages/app/add-child";
 import SchoolDetailPage from "@/pages/app/school-detail";
 import ChatPage from "@/pages/app/chat";
+import SettingsPage from "@/pages/app/settings";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ function App() {
           </Route>
 
           <Route path="/app/profile/add-child" element={<AddChildPage />} />
+          <Route path="/app/profile/settings" element={<SettingsPage />} />
           <Route path="/app/school/:id" element={<SchoolDetailPage />} />
 
           {/* Admin Routes (Placeholder) */}

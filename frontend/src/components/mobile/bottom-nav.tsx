@@ -1,16 +1,18 @@
 import { Link, useLocation } from "react-router-dom";
 import { Compass, MessageSquare, BookOpen, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export function BottomNav() {
   const location = useLocation();
   const path = location.pathname;
+  const { t } = useTranslation();
 
   const navItems = [
-    { label: "择校", icon: Compass, path: "/app" },
-    { label: "AI助手", icon: MessageSquare, path: "/app/chat" },
-    { label: "进度", icon: BookOpen, path: "/app/tracking" },
-    { label: "我的", icon: User, path: "/app/profile" },
+    { label: t("nav.home"), icon: Compass, path: "/app" },
+    { label: t("nav.chat"), icon: MessageSquare, path: "/app/chat" },
+    { label: t("nav.tracking"), icon: BookOpen, path: "/app/tracking" },
+    { label: t("nav.profile"), icon: User, path: "/app/profile" },
   ];
 
   return (

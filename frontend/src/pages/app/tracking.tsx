@@ -16,6 +16,7 @@ export default function TrackingPage() {
   const { currentChildId } = useAuthStore();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const { data: applications, isLoading } = useQuery({
     queryKey: ["applications", currentChildId],
@@ -42,10 +43,10 @@ export default function TrackingPage() {
 
   return (
     <div className="p-4 space-y-4">
-      <h1 className="text-xl font-bold">申请追踪</h1>
+      <h1 className="text-xl font-bold">{t('nav.tracking')}</h1>
       
       {isLoading ? (
-        <div className="text-center text-sm text-gray-500">加载中...</div>
+        <div className="text-center text-sm text-gray-500">{t('common.loading')}</div>
       ) : applications?.length === 0 ? (
         <div className="text-center text-gray-500 py-8 border rounded-lg border-dashed">
           暂无关注的学校

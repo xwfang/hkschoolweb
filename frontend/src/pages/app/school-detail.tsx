@@ -54,6 +54,16 @@ export default function SchoolDetailPage() {
     });
   };
 
+  const handleBack = () => {
+    // Check if there is a history stack to go back to within the app
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      // Fallback to home if no history (e.g. direct link or refresh on first page)
+      navigate("/app/home", { replace: true });
+    }
+  };
+
   if (isLoading) return <div className="p-4 text-center">加载中...</div>;
   if (!school) return (
     <div className="p-4 text-center mt-10">
@@ -61,7 +71,7 @@ export default function SchoolDetailPage() {
         <p className="font-bold">无法加载学校信息</p>
         <p className="text-sm mt-1">可能是该学校 ID ({id}) 不存在，或者后台接口未返回数据。</p>
       </div>
-      <Button variant="outline" onClick={() => navigate(-1)}>返回上一页</Button>
+      <Button variant="outline" onClick={handleBack}>返回上一页</Button>
     </div>
   );
 
@@ -69,7 +79,7 @@ export default function SchoolDetailPage() {
     <div className="min-h-screen bg-white pb-20">
        {/* Header */}
       <div className="bg-white px-4 h-14 flex items-center gap-3 sticky top-0 z-10 border-b">
-        <Button variant="ghost" size="sm" className="p-0 h-8 w-8" onClick={() => navigate(-1)}>
+        <Button variant="ghost" size="sm" className="p-0 h-8 w-8" onClick={handleBack}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="font-semibold text-lg truncate flex-1">{school.name_cn}</h1>
