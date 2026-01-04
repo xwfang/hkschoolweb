@@ -63,7 +63,7 @@ Most endpoints require a JWT token.
     "current_grade": "P6",
     "target_grade": "S1", // Optional: Target grade for admission (e.g., S1, P1, K1). Inferred from current_grade if empty.
     "gender": "F", // "M" or "F"
-    "target_districts": "Kowloon City, Wan Chai",
+    "target_districts": "Kowloon City, Wan Chai", // User friendly names, will be mapped to snake_case internally
     "resume_text": "Grade 8 Piano, Math Olympiad Silver" // Optional
   }
   ```
@@ -107,8 +107,7 @@ Most endpoints require a JWT token.
     1. **Strict Match**: Filters by Gender (e.g., Boys/Co-ed for 'M') and Grade (e.g., Secondary for 'S1'). If `target_grade` is empty, it is inferred from `current_grade`.
     2. **District Match**: Filters by `target_districts` if set.
     3. **Expansion Strategy**: If fewer than 5 strict matches are found in the target districts, the search automatically expands to **All Districts**.
-       - For Secondary schools, it prioritizes **Band 1** and ranked schools.
-       - For others, it prioritizes by name.
+       - It prioritizes schools by `Popularity` score (descending).
 - **Query Parameters**:
   - `page`: Page number (default: 1).
   - `limit`: Number of items per page (default: 20).
@@ -121,9 +120,11 @@ Most endpoints require a JWT token.
         "id": 1,
         "name_en": "Pooi To Middle School",
         "category": "Secondary (Aided)",
-        "district": "Kowloon City",
+        "district": "kowloon_city",
         "gender": "Girls",
         "banding": "Band 1",
+        "popularity": 740,
+        "tags": "Academic, Chinese, Math",
         ...
       }
     ],
@@ -143,17 +144,21 @@ Most endpoints require a JWT token.
 - **Endpoint**: `GET /schools`
 - **Query Parameters**:
   - `district`: e.g., "kowloon_city" (Use metadata keys)
-  - `category`: e.g., "Aided", "DSS"
+  - `category`: e.g., "Secondary (DSS)", "Primary (Aided)", "Kindergarten"
   - `banding`: "Band 1", "Band 2", "Band 3"
   - `gender`: "boys", "girls", "co_ed" (Use metadata keys)
   - `religion`: e.g., "Christianity"
+  - `sort`: "popularity" (Sort by popularity score descending)
   - `name`: Search by name (English or Chinese)
-- **Example**: `GET /schools?district=kowloon_city&gender=girls`
+- **Example**: `GET /schools?district=kowloon_city&sort=popularity`
 - **Response**: Array of School objects.
 
 ### 3.2 Get School Details
 - **Endpoint**: `GET /schools/:id`
 - **Response**: Single School object.
+  - **Note on Fields**:
+    - `popularity`: Integer score representing school hotness.
+    - `tags`: Comma-separated strings (e.g. "Academic, Elite, Music") for AI/Search features.
 
 ### 3.3 Create School (Admin)
 - **Endpoint**: `POST /schools`
@@ -162,12 +167,14 @@ Most endpoints require a JWT token.
   {
     "name_en": "Example School",
     "name_cn": "示例中学",
-    "district": "Wan Chai",
+    "district": "wan_chai",
     "gender": "Co-ed",
     "banding": "Band 1",
-    "category": "Aided",
+    "category": "Secondary (Aided)",
     "website_home": "http://...",
-    "website_admission": "http://..."
+    "website_admission": "http://...",
+    "popularity": 500,
+    "tags": "New, Featured"
   }
   ```
 
@@ -178,6 +185,7 @@ Most endpoints require a JWT token.
 
 ### 4.1 Create Application (Track a School)
 - **Endpoint**: `POST /applications`
+- **Description**: Creates a tracking record for a specific school. **Note**: Creating an application automatically increments the school's `popularity` score by 1.
 - **Request Body**:
   ```json
   {

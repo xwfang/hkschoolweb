@@ -5,28 +5,31 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { aiApi } from "@/api/ai";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
-  content: string;
+  content?: string;
+  contentKey?: string;
 }
 
 export default function ChatPage() {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
       role: "assistant",
-      content: "您好！我是您的升学助手。您可以问我任何关于香港学校申请的问题，例如：“九龙城有哪些 Band 1 男校？” 或 “如何准备直资中学的面试？”"
+      contentKey: 'chat.welcome'
     }
   ]);
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const QUICK_ACTIONS = [
-    { label: "写自荐信", icon: "📝", prompt: "请帮我为 [孩子姓名] 写一封申请 [目标学校] 的自荐信，突出 [特长]..." },
-    { label: "面试模拟", icon: "🎤", prompt: "我要准备直资中学的面试，请扮演面试官向我提问。" },
-    { label: "简历分析", icon: "📊", prompt: "请分析我孩子的简历优势和劣势：[粘贴简历内容]" },
+    { label: t('chat.quick_action.letter'), icon: "📝", prompt: t('chat.prompt.letter') },
+    { label: t('chat.quick_action.interview'), icon: "🎤", prompt: t('chat.prompt.interview') },
+    { label: t('chat.quick_action.resume'), icon: "📊", prompt: t('chat.prompt.resume') },
   ];
 
   const chatMutation = useMutation({
@@ -35,7 +38,7 @@ export default function ChatPage() {
       setMessages((prev) => [
         ...prev,
         {
-          id: Date.now().toString(),
+          id: new Date().getTime().toString(),
           role: "assistant",
           content: data.response
         }
@@ -45,9 +48,9 @@ export default function ChatPage() {
       setMessages((prev) => [
         ...prev,
         {
-          id: Date.now().toString(),
+          id: new Date().getTime().toString(),
           role: "assistant",
-          content: "抱歉，我遇到了一些问题，请稍后再试。"
+          content: t('chat.error')
         }
       ]);
     }
@@ -67,7 +70,7 @@ export default function ChatPage() {
     
     if (!textToSend.trim() || chatMutation.isPending) return;
 
-    const currentId = Date.now().toString();
+    const currentId = new Date().getTime().toString();
 
     const userMsg: Message = {
       id: currentId,
@@ -77,7 +80,7 @@ export default function ChatPage() {
 
     setMessages((prev) => [...prev, userMsg]);
     setInputValue("");
-    chatMutation.mutate(userMsg.content);
+    chatMutation.mutate(userMsg.content || "");
   };
 
   return (
@@ -87,7 +90,7 @@ export default function ChatPage() {
         <div className="bg-indigo-100 p-1.5 rounded-full">
           <Bot className="h-5 w-5 text-indigo-600" />
         </div>
-        <h1 className="font-semibold text-lg">AI助手</h1>
+        <h1 className="font-semibold text-lg">{t('chat.title')}</h1>
         <div className="ml-auto">
           <Sparkles className="h-4 w-4 text-yellow-500 animate-pulse" />
         </div>
@@ -117,7 +120,7 @@ export default function ChatPage() {
                   : "bg-white text-gray-800 border rounded-tl-none"
               )}
             >
-              {msg.content}
+              {msg.content || (msg.contentKey ? t(msg.contentKey) : "")}
             </div>
 
             {msg.role === "user" && (
@@ -167,7 +170,7 @@ export default function ChatPage() {
           <Input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="问问 AI..."
+            placeholder={t('chat.input_placeholder')}
             className="flex-1 bg-gray-50 focus:bg-white"
             disabled={chatMutation.isPending}
           />

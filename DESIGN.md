@@ -1,37 +1,34 @@
-# 香港学校插班资讯系统 - 架构设计与实施状态 (Architecture & Implementation Status)
+# Hong Kong School Admission System - Technical Design & Implementation Spec
 
-**最后更新**: 2026-01-03
-**版本**: v0.5 (后端核心功能就绪)
+**Last Updated**: 2026-01-04
+**Version**: v0.6
 
-## 1. 项目概述 (Project Overview)
+## 1. Project Overview (项目概述)
+**Goal**: A free, mobile-first tool for Hong Kong parents to track school admission/transfer (插班) information, featuring multi-child profile management and AI-driven school matching.
+**目标**: 为香港家长提供一个免费、易用且移动端友好的工具，用于查询、追踪和管理学校插班（Transfer/Admission）信息。
 
-**目标**: 为香港家长提供一个免费、易用且移动端友好的工具，用于查询、追踪和管理学校插班（Transfer/Admission）信息。系统支持多子女档案管理，并利用 AI 技术辅助简历分析和学校匹配。
-
-### 核心价值
-1.  **多子女管理**: 针对不同年级、性别的子女提供个性化的学校筛选。
-2.  **信息整合**: 聚合分散在各校官网的插班资讯（HTML/PDF）。
-3.  **智能匹配**: 利用 LLM/RAG 技术，根据学生简历与学校特色进行语义匹配。
-4.  **移动优先**: 专为手机浏览器优化的 Web 体验。
+**Core Value & Scenarios (核心价值与场景)**:
+1.  **Multi-Child Management (多子女管理)**: Personalized filtering for different grades/genders (e.g., "Find Band 1 Boys' School for S2").
+2.  **Information Aggregation (信息整合)**: Centralizes scattered admission info (HTML/PDF) from school websites.
+3.  **AI Matching (智能匹配)**: Uses LLM/RAG to match student resumes with school profiles (e.g., "Strong in Piano" -> "Music School").
+4.  **Tracking (申请追踪)**: Manage application status (Interested -> Applied -> Offer) in a Kanban-like view.
 
 ---
 
-## 2. 系统架构 (System Architecture)
+## 2. System Architecture (系统架构)
 
-### 2.1 技术栈 (Tech Stack)
-
-| 组件 | 选型 | 状态 | 说明 |
+### 2.1 Tech Stack (技术栈)
+| Component | Selection | Status | Details |
 | :--- | :--- | :--- | :--- |
-| **Language** | Go (Golang) | ✅ 已实现 | 高性能，适合并发爬虫和 Web 服务 |
-| **Web Framework** | Gin | ✅ 已实现 | 轻量级 RESTful API 框架 |
-| **Database** | SQLite | ✅ 已实现 | 单文件数据库，无需运维，易备份 |
-| **ORM** | GORM | ✅ 已实现 | 简化数据库操作与迁移 |
-| **Auth** | JWT + Mock OTP | ✅ 已实现 | 基于 Token 的无状态认证 |
-| **Frontend** | React + Vite + Tailwind | ⏳ 规划中 | 移动端优先的响应式 Web |
-| **Crawler** | GoQuery + Chromedp | 🚧 进行中 | 通用爬虫框架已搭建，特定解析器开发中 |
-| **AI/LLM** | OpenAI/Gemini API | ⏳ 规划中 | 用于简历分析和 RAG 问答 |
+| **Language** | Go (Golang) | ✅ Ready | High performance, concurrency for crawler/API |
+| **Web Framework** | Gin | ✅ Ready | Lightweight RESTful API |
+| **Database** | SQLite | ✅ Ready | Single-file DB, easy maintenance (GORM used) |
+| **Auth** | JWT + Mock OTP | ✅ Ready | Stateless token-based auth |
+| **Crawler** | GoQuery + Chromedp | ✅ Ready | Generic framework & schooland.hk list crawler implemented |
+| **AI/LLM** | OpenAI/Gemini API | ⚠️ Mock | Resume parsing & Chat interface (Mocked) |
+| **Frontend** | React + Vite + Tailwind | ⏳ Planned | Mobile-first responsive Web |
 
-### 2.2 模块划分
-
+### 2.2 Module Diagram (模块图)
 ```mermaid
 graph TD
     Client[Parent Mobile Web] --> API[Go API Server]
@@ -52,99 +49,105 @@ graph TD
 
 ---
 
-## 3. 数据库设计 (Database Schema)
+## 3. Database Schema (数据库设计)
 
-基于 `internal/model/model.go` 的实际实现：
+Based on `internal/model/model.go`:
 
-### 3.1 核心实体
+1.  **`users` (用户表)**
+    *   `id`: PK
+    *   `role`: 'parent' | 'admin'
+    *   `identifier`: Phone/Email (Unique)
+    *   `password_hash`: (Admin only)
 
-1.  **Users (用户表)**
-    *   存储家长及管理员账户。
-    *   字段: `Identifier` (手机/邮箱), `Role` (parent/admin), `PasswordHash` (仅管理员)。
-    *   关联: 1个 User -> N个 ChildProfile。
+2.  **`child_profiles` (子女档案)**
+    *   `id`: PK, `parent_id`: FK -> users.id
+    *   `name`: Nickname
+    *   `current_grade` (e.g. P6), `target_grade` (e.g. S1)
+    *   `gender`: 'M' | 'F'
+    *   `target_districts`: CSV string (e.g., "kowloon_city,wan_chai")
+    *   `resume_text`: AI-extracted keywords (e.g., "Grade 8 Piano, Math Olympiad")
 
-2.  **ChildProfiles (子女档案表)**
-    *   核心业务表，用于个性化筛选。
-    *   字段: `Name`, `CurrentGrade` (e.g., P6), `Gender` (M/F), `TargetDistricts` (逗号分隔), `ResumeText` (AI 提取的简历文本)。
-    *   关联: 1个 Child -> N个 Application。
+3.  **`schools` (学校基础表)**
+    *   `id`: PK
+    *   `name_cn`, `name_en`
+    *   `category` (e.g., "Secondary (DSS)"), `banding` (Band 1-3)
+    *   `gender` (Boys/Girls/Co-ed), `district` (snake_case)
+    *   `popularity`: Integer score (Hotness, increments on user tracking)
+    *   `tags`: AI tags (e.g., "Music, Elite, STEM")
+    *   `website_home`: Official site
+    *   `website_admission`: **Crawler Entry Point**
 
-3.  **Schools (学校基础表)**
-    *   存储全港学校静态数据。
-    *   字段: `Category` (直资/津贴等), `Banding` (Band 1/2/3), `Gender` (男/女/混校), `District` (地区), `MOI` (中英文教学), `WebsiteAdmission` (爬虫入口)。
+4.  **`admission_events` (插班活动表)**
+    *   `id`: PK, `school_id`: FK
+    *   `academic_year`, `target_grade`
+    *   `application_start`, `application_end`, `interview_date`
+    *   `source_url` (PDF/HTML link), `raw_content`
 
-4.  **AdmissionEvents (插班活动表)**
-    *   存储动态的招生信息（核心价值数据）。
-    *   字段: `ApplicationStartDate`, `ApplicationEndDate`, `InterviewDate`, `SourceURL`。
+5.  **`applications` (申请追踪表)**
+    *   `id`: PK, `child_id`: FK, `school_id`: FK
+    *   `status`: 'interested', 'applied', 'interview', 'offer', 'rejected'
+    *   `notes`: User private notes
 
-5.  **Applications (申请追踪表)**
-    *   家长对自己关注学校的个人状态记录。
-    *   字段: `Status` (interested, applied, interview, offer, rejected), `Notes`。
-
-6.  **OTPCodes**
-    *   临时存储验证码，用于登录验证。
-
----
-
-## 4. API 接口清单 (API Endpoints)
-
-### 4.1 认证 (Auth) - ✅ Completed
-*   `POST /api/v1/auth/login`: 发送验证码 (Mock: 123456)
-*   `POST /api/v1/auth/verify`: 验证并获取 JWT Token
-
-### 4.2 子女管理 (Children) - ✅ Completed
-*   `POST /api/v1/children`: 创建档案
-*   `GET /api/v1/children`: 列表查询
-*   `PUT /api/v1/children/:id`: 更新档案
-*   `GET /api/v1/children/:id/matches`: **核心功能** - 获取与该子女匹配的学校列表 (基于性别、地区)
-
-### 4.3 学校管理 (Schools) - ✅ Completed
-*   `GET /api/v1/schools`: 搜索学校 (支持 query 参数: district, gender, banding, religion, name)
-*   `POST /api/v1/schools`: 管理员新增学校
-*   `PUT/DELETE /api/v1/schools/:id`: 管理员维护
-
-### 4.4 申请追踪 (Applications) - ✅ Completed
-*   `POST /api/v1/applications`: 添加关注/申请
-*   `GET /api/v1/applications`: 查看申请列表
-*   `PUT /api/v1/applications/:id`: 更新状态 (如改为 "Interview")
-
-### 4.5 爬虫与 AI (Advanced) - 🚧 In Progress
-*   `POST /api/v1/crawl`: 触发爬虫任务 (目前仅框架)
-*   `POST /api/v1/chat`: AI 对话接口 (Mock)
-*   `POST /api/v1/chat/resume`: 简历上传分析 (Mock)
+6.  **`otp_codes`**: Temporary storage for login verification codes.
 
 ---
 
-## 5. 当前实施状态 (Implementation Status)
+## 4. API & Functional Design (功能与接口)
 
-### ✅ 已完成 (Done)
-1.  **后端基础架构**: Gin Server, SQLite DB, GORM Models, Migration, Seeding。
-2.  **核心业务逻辑**:
-    *   用户认证流程 (OTP + JWT)。
-    *   多子女档案管理。
-    *   学校数据的增删改查与多维度筛选。
-    *   申请进度追踪 (Application Tracking)。
-3.  **测试数据**: 预置了部分学校 (Pooi To, HFCC, La Salle) 和测试用户。
+### 4.1 Authentication (Auth)
+*   **Flow**: OTP (SMS/Email) -> JWT Token.
+*   `POST /auth/login`: Send Mock OTP (123456).
+*   `POST /auth/verify`: Verify and issue JWT.
 
-### 🚧 进行中 (In Progress)
-1.  **爬虫实现 (Crawler Implementation)**:
-    *   已创建 `internal/crawler` 结构。
-    *   待实现: 针对特定学校 (如 Pooi To) 的 HTML 解析逻辑，提取日期信息。
-2.  **AI 模块**:
-    *   已创建 Handler。
-    *   待实现: 集成 LLM SDK，实现简历 OCR 转文本及 RAG 检索。
+### 4.2 Child Management (Children)
+*   **Feature**: Manage profiles for multiple children to enable personalized recommendations.
+*   `POST /children`: Create profile.
+*   `GET /children`: List profiles.
+*   `GET /children/:id/matches`: **Core Feature**.
+    *   Matches schools based on `TargetGrade`, `Gender`, and `TargetDistricts`.
+    *   **Logic**: Strict Match -> Fallback to District Match -> Expansion (Sort by Popularity).
 
-### ⏳ 待办 (Pending)
-1.  **前端开发 (Frontend)**:
-    *   计划采用 React + Vite + Tailwind CSS。
-    *   实现移动端适配的页面。
-2.  **PDF 解析**:
-    *   研究 Go 处理 PDF 的库 (如 `rsc/pdf` 或调用 Python 服务)，用于解析学校通告。
-3.  **部署脚本**: Dockerfile 及 Docker Compose 配置。
+### 4.3 School Management (Schools)
+*   **Feature**: Searchable school database.
+*   `GET /schools`: Search by district, banding, name. Support `sort=popularity`.
+*   `POST /schools`: Admin create school.
+
+### 4.4 Application Tracking (Applications)
+*   **Feature**: Kanban-like status tracking for parents.
+*   `POST /applications`: Track a school. **Side Effect**: Increments school `popularity` score.
+*   `GET /applications`: List applications by Child ID.
+*   `PUT /applications/:id`: Update status/notes.
+
+### 4.5 AI & Crawler (Advanced)
+*   **Crawler**:
+    *   `POST /crawl`: Trigger crawler tasks.
+    *   **Current State**: Framework ready. `schooland.hk` list crawler implemented.
+*   **AI**:
+    *   `POST /chat`: Context-aware school query (Mock).
+    *   `POST /children/analyze`: Extract profile from text (Simple keyword match implemented).
 
 ---
 
-## 6. 下一步计划 (Next Steps)
+## 5. Implementation Roadmap & Status (实施路线图)
 
-1.  **完善爬虫**: 实现 `PooiToParser`，跑通从网页抓取日期并存入 `admission_events` 的完整流程。
-2.  **AI 集成**: 申请 API Key，跑通一个简单的 "Chat with School Data" 场景。
-3.  **前端启动**: 初始化 React 项目，对接登录和学校列表接口。
+### Phase 1: Infrastructure & DB (✅ Done)
+*   Go+Gin Server setup.
+*   SQLite+GORM schema design and migration.
+*   JWT Auth & OTP flow implementation.
+
+### Phase 2: Core Business Logic (✅ Done)
+*   Child Profile CRUD.
+*   School Search & Filtering logic.
+*   Application Tracking logic.
+*   i18n Metadata (Districts/Categories).
+*   **Update**: Added `Popularity` field, sorting logic, and automatic increment on application creation.
+
+### Phase 3: Crawler & Data (🚧 In Progress)
+*   **Crawler**: `schooland.hk` list parsing implemented for Kindergartens, Primary, and Secondary schools.
+*   **Seeding**: Initial top ~90 schools seeded with popularity scores and tags.
+*   **Pending**: Deep crawling of specific school admission pages (PDF/HTML date extraction).
+
+### Phase 4: Frontend & AI (⏳ Pending)
+*   **Frontend**: React Mobile Web (Login -> Profile -> Match -> Track).
+*   **AI**: Real LLM integration for Resume Parsing and RAG (Currently Mock/Simple).
+*   **Deployment**: Dockerfile & Docker Compose.

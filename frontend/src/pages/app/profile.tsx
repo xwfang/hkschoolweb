@@ -6,11 +6,13 @@ import { useQuery } from "@tanstack/react-query";
 import { childrenApi } from "@/api/children";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useMetadata } from "@/hooks/use-metadata";
 
 export default function ProfilePage() {
   const { user, logout, setCurrentChildId } = useAuthStore();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { getGenderLabel } = useMetadata();
 
   const { data: children, isLoading } = useQuery({
     queryKey: ["children"],
@@ -29,7 +31,7 @@ export default function ProfilePage() {
           <User className="h-8 w-8 text-gray-500" />
         </div>
         <div>
-          <h2 className="text-lg font-bold">家长用户</h2>
+          <h2 className="text-lg font-bold">{t('profile.user_title')}</h2>
           <p className="text-sm text-gray-500">{user?.identifier}</p>
         </div>
       </div>
@@ -56,14 +58,14 @@ export default function ProfilePage() {
                   <p className="font-medium flex items-center gap-2">
                     {child.name}
                     <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
-                      {child.gender === "M" ? "男" : "女"}
+                      {getGenderLabel(child.gender)}
                     </span>
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    年级: {child.current_grade} {child.target_grade ? `-> ${child.target_grade}` : ""} | 目标: {child.target_districts}
+                    {t('profile.grade')}: {child.current_grade} {child.target_grade ? `-> ${child.target_grade}` : ""} | {t('profile.target')}: {child.target_districts}
                   </p>
                 </div>
-                <Button variant="outline" size="sm">编辑</Button>
+                <Button variant="outline" size="sm">{t('profile.edit')}</Button>
               </CardContent>
             </Card>
           ))

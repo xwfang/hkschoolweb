@@ -5,10 +5,12 @@ import { ArrowLeft, Sparkles, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { childrenApi } from "@/api/children";
+import { useMetadata } from "@/hooks/use-metadata";
 
 export default function AddChildPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { districts } = useMetadata();
   const [formData, setFormData] = useState({
     name: "",
     gender: "M" as "M" | "F",
@@ -47,40 +49,47 @@ export default function AddChildPage() {
       }
 
       // Smart District Mapping (Chinese <-> English) to improve match rate
-      let districts = data.target_districts || "";
-      const DISTRICT_MAP: Record<string, string> = {
-        "九龙城": "Kowloon City, 九龍城",
-        "Kowloon City": "Kowloon City, 九龍城",
-        "湾仔": "Wan Chai, 灣仔",
-        "Wan Chai": "Wan Chai, 灣仔",
-        "中西区": "Central and Western, 中西區",
-        "油尖旺": "Yau Tsim Mong, 油尖旺",
-        "深水埗": "Sham Shui Po, 深水埗",
-        "观塘": "Kwun Tong, 觀塘",
-        "黄大仙": "Wong Tai Sin, 黃大仙",
-        "沙田": "Sha Tin, 沙田",
-        "大埔": "Tai Po, 大埔",
-        "屯门": "Tuen Mun, 屯門",
-        "元朗": "Yuen Long, 元朗",
-        "北区": "North, 北區",
-        "西贡": "Sai Kung, 西貢",
-        "离岛": "Islands, 離島",
-        "东区": "Eastern, 東區",
-        "南区": "Southern, 南區"
-      };
+      const districtsInput = data.target_districts || "";
+      
+      // Try to find matching district keys from metadata
+      const mappedDistricts: string[] = [];
+      
+      // If the input contains known district names (en, tc, sc), map them to keys
+      if (districts && districts.length > 0) {
+        // Create a map of all possible names to keys
+        const nameToKey: Record<string, string> = {};
+        districts.forEach(d => {
+            nameToKey[d.en.toLowerCase()] = d.key;
+            nameToKey[d.tc] = d.key;
+            nameToKey[d.sc] = d.key;
+            // Also partial matches for common short names
+            if (d.tc.endsWith("区")) nameToKey[d.tc.replace("区", "")] = d.key;
+            if (d.sc.endsWith("区")) nameToKey[d.sc.replace("区", "")] = d.key;
+        });
 
-      // Check if any key is present in the input district string
-      for (const [key, value] of Object.entries(DISTRICT_MAP)) {
-        if (districts.includes(key)) {
-          // If found, replace/append to ensure we cover both languages
-          // Simple approach: just use the mapped value if it's a direct match or close enough
-          // But since input might be comma separated "九龙城, 湾仔", we should be careful.
-          // Let's just append the mapped value if it's not already there.
-          if (!districts.includes(value.split(",")[0])) { // Check if English part exists
-             districts = districts.replace(key, value);
-          }
-        }
+        // Split input by common separators
+        const parts = districtsInput.split(/[,，、\s]+/).filter(Boolean);
+        
+        parts.forEach(part => {
+            const lowerPart = part.toLowerCase();
+            // Exact match check
+            if (nameToKey[lowerPart]) {
+                mappedDistricts.push(nameToKey[lowerPart]);
+            } else {
+                // Fuzzy match: check if any key contains the part or vice versa
+                // This is a bit risky but helpful for AI output
+                const found = Object.keys(nameToKey).find(k => k.includes(lowerPart) || lowerPart.includes(k));
+                if (found) {
+                    mappedDistricts.push(nameToKey[found]);
+                }
+            }
+        });
       }
+
+      // If we found mapped keys, join them with commas. Otherwise keep original (fallback)
+      const finalDistricts = mappedDistricts.length > 0 
+          ? [...new Set(mappedDistricts)].join(",") 
+          : districtsInput;
 
       setFormData(prev => ({
         ...prev,
@@ -89,7 +98,7 @@ export default function AddChildPage() {
         // Update grade if present
         current_grade: data.current_grade || prev.current_grade,
         // Update target districts if present
-        target_districts: districts || prev.target_districts,
+        target_districts: finalDistricts || prev.target_districts,
         gender,
         resume_text: data.resume_text || analysisText || prev.resume_text
       }));

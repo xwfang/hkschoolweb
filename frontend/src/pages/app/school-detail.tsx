@@ -5,8 +5,12 @@ import { applicationsApi, type Application } from "@/api/applications";
 import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Globe, ExternalLink } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useMetadata } from "@/hooks/use-metadata";
 
 export default function SchoolDetailPage() {
+  const { t } = useTranslation();
+  const { getDistrictLabel, getGenderLabel, getCategoryLabel } = useMetadata();
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentChildId } = useAuthStore();
@@ -93,11 +97,11 @@ export default function SchoolDetailPage() {
 
         <div className="flex flex-wrap gap-2">
            {school.banding && <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm">{school.banding}</span>}
-           <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{school.district}</span>
-           <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{school.gender}</span>
-           <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{school.category}</span>
+           <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{getDistrictLabel(school.district)}</span>
+           <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{getGenderLabel(school.gender)}</span>
+           <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{getCategoryLabel(school.category)}</span>
            {school.religion && <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{school.religion}</span>}
-           {school.school_net && <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">校网: {school.school_net}</span>}
+           {school.school_net && <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{t('school.net')}: {school.school_net}</span>}
         </div>
 
         {school.tags && (

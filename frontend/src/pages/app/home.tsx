@@ -7,17 +7,20 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { childrenApi } from "@/api/children";
 import { schoolsApi } from "@/api/schools";
 import { applicationsApi } from "@/api/applications";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChildSwitcher } from "@/components/mobile/child-switcher";
 import { useTranslation } from "react-i18next";
+import { useMetadata } from "@/hooks/use-metadata";
 
 import { User } from "lucide-react";
 
 export default function HomePage() {
   const { t } = useTranslation();
+  const { getDistrictLabel, getGenderLabel, getCategoryLabel, districts, categories, genders } = useMetadata();
   const { currentChildId } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
+  // activeFilter now stores the 'key' from metadata
   const [activeFilter, setActiveFilter] = useState("");
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -45,27 +48,52 @@ export default function HomePage() {
 
   const currentLevel = getLevel(currentChild?.current_grade);
 
-  const FILTERS_BY_LEVEL: Record<string, Array<{ label: string; icon: React.ElementType; value: string }>> = {
-    "Kindergarten": [
-      { label: "九龙城", icon: MapPin, value: "Kowloon City" },
-      { label: "非牟利", icon: SchoolIcon, value: "Non-profit" }, // Placeholder value
-      { label: "私立", icon: SchoolIcon, value: "Private" }, // Placeholder
-    ],
-    "Primary": [
-      { label: "九龙城", icon: MapPin, value: "Kowloon City" },
-      { label: "直资", icon: SchoolIcon, value: "DSS" },
-      { label: "私立", icon: SchoolIcon, value: "Private" },
-      { label: "官津", icon: SchoolIcon, value: "Aided" }, // Aided + Government
-    ],
-    "Secondary": [
-      { label: "Band 1", icon: Award, value: "Band 1" },
-      { label: "九龙城", icon: MapPin, value: "Kowloon City" },
-      { label: "直资", icon: SchoolIcon, value: "DSS" },
-      { label: "男校", icon: User, value: "Boys" },
-    ]
+  // Dynamic filters based on metadata
+  // We can pick some popular ones or show all
+  // For demo, we show a mix of popular districts and categories
+  const getFilters = () => {
+    const filters: Array<{ label: string; icon: React.ElementType; value: string; type: 'district' | 'category' | 'gender' | 'banding' }> = [];
+
+    // Banding (Only for Secondary)
+    if (currentLevel === "Secondary") {
+      filters.push({ label: "Band 1", icon: Award, value: "Band 1", type: "banding" });
+    }
+
+    // Popular Districts (Example: Kowloon City, Wan Chai)
+    const popularDistricts = ["kowloon_city", "wan_chai", "central_western"];
+    districts.filter(d => popularDistricts.includes(d.key)).forEach(d => {
+      filters.push({ label: getDistrictLabel(d.key), icon: MapPin, value: d.key, type: "district" });
+    });
+
+    // Categories
+    const popularCategories = ["secondary_dss", "primary_aided", "kindergarten_non_profit"];
+    categories.filter(c => popularCategories.some(pc => c.key.includes(pc) || c.key === pc)).forEach(c => {
+       // Simple filter to show relevant categories for current level
+       if (c.key.toLowerCase().includes(currentLevel.toLowerCase())) {
+          filters.push({ label: getCategoryLabel(c.key), icon: SchoolIcon, value: c.key, type: "category" });
+       }
+    });
+
+    // Gender
+    if (currentLevel === "Secondary" || currentLevel === "Primary") {
+       genders.forEach(g => {
+          filters.push({ label: getGenderLabel(g.key), icon: User, value: g.key, type: "gender" });
+       });
+    }
+
+    return filters;
   };
 
-  const activeFilters = FILTERS_BY_LEVEL[currentLevel] || FILTERS_BY_LEVEL["Secondary"];
+  const activeFilters = getFilters();
+
+  // Determine filter params
+  const getFilterParams = () => {
+     const selectedFilter = activeFilters.find(f => f.value === activeFilter);
+     if (!selectedFilter) return {};
+     return {
+        [selectedFilter.type]: selectedFilter.value
+     };
+  };
 
   // Fetch matches for current child
   const { data: matchData, isLoading: isLoadingMatches } = useQuery({
@@ -79,11 +107,7 @@ export default function HomePage() {
     queryKey: ["schools", searchQuery, activeFilter],
     queryFn: () => schoolsApi.list({ 
       name: searchQuery,
-      // Map filters to API params (simplified for demo)
-      banding: activeFilter === "Band 1" ? "Band 1" : undefined,
-      district: activeFilter === "Kowloon City" ? "Kowloon City" : undefined,
-      category: activeFilter === "DSS" ? "Direct Subsidy" : undefined,
-      gender: activeFilter === "Boys" ? "Boys" : undefined,
+      ...getFilterParams()
     }),
     // Always fetch all schools if we don't have a child selected, or if we are searching/filtering
     enabled: !currentChildId || !!searchQuery || !!activeFilter || (!!currentChildId && !isLoadingMatches && (!matchData?.matches || matchData.matches.length === 0)),
@@ -194,7 +218,7 @@ export default function HomePage() {
                 <BookOpen className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-sm mb-1">AI 择校建议</h3>
+                <h3 className="font-bold text-sm mb-1">{t('home.ai_recommendation')}</h3>
                 <p className="text-xs text-indigo-100 leading-relaxed opacity-90 line-clamp-3">
                   {matchData.analysis}
                 </p>
@@ -207,7 +231,7 @@ export default function HomePage() {
         {isFallback && (
           <div className="bg-orange-50 text-orange-800 text-xs px-4 py-2 rounded-lg flex items-center gap-2">
             <span className="text-lg">💡</span>
-            暂无针对该子女的个性化匹配，为您展示热门学校。
+            {t('home.no_matches_fallback', '暂无针对该子女的个性化匹配，为您展示热门学校。')}
           </div>
         )}
 
@@ -241,11 +265,11 @@ export default function HomePage() {
                         <div className="flex flex-wrap gap-2">
                           <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded">
                             <MapPin className="h-3 w-3" />
-                            {school.district}
+                            {getDistrictLabel(school.district)}
                           </div>
                           <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded">
                             <User className="h-3 w-3" />
-                            {school.gender}
+                            {getGenderLabel(school.gender)}
                           </div>
                         </div>
                       </div>
@@ -260,7 +284,7 @@ export default function HomePage() {
                           handleTrack(school.id);
                         }}
                       >
-                        {isTracked ? "已关注" : "关注"}
+                        {isTracked ? t('common.followed') : t('common.follow')}
                       </Button>
                     </div>
                   </CardContent>
@@ -271,10 +295,10 @@ export default function HomePage() {
             {displaySchools?.length === 0 && (
               <div className="text-center text-gray-500 py-12 bg-gray-50 rounded-lg border border-dashed">
                 <SchoolIcon className="h-8 w-8 mx-auto text-gray-300 mb-2" />
-                <p>未找到符合条件的学校</p>
+                <p>{t('home.no_matches')}</p>
                 {(activeFilter || searchQuery) && (
                   <Button variant="link" onClick={() => { setActiveFilter(""); setSearchQuery(""); }}>
-                    清除筛选
+                    {t('home.clear_filters')}
                   </Button>
                 )}
               </div>
