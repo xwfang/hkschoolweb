@@ -4,7 +4,7 @@ import { schoolsApi } from "@/api/schools";
 import { applicationsApi, type Application } from "@/api/applications";
 import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Globe, ExternalLink } from "lucide-react";
+import { ArrowLeft, Globe, ExternalLink, Flame, Tag } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useMetadata } from "@/hooks/use-metadata";
 
@@ -47,7 +47,6 @@ export default function SchoolDetailPage() {
 
   const handleTrack = () => {
     if (!currentChildId) {
-      alert("请先选择一个子女");
       navigate("/app/profile");
       return;
     }
@@ -68,14 +67,14 @@ export default function SchoolDetailPage() {
     }
   };
 
-  if (isLoading) return <div className="p-4 text-center">加载中...</div>;
+  if (isLoading) return <div className="p-4 text-center">{t('common.loading')}</div>;
   if (!school) return (
     <div className="p-4 text-center mt-10">
       <div className="bg-red-50 text-red-800 p-4 rounded-lg mb-4">
-        <p className="font-bold">无法加载学校信息</p>
-        <p className="text-sm mt-1">可能是该学校 ID ({id}) 不存在，或者后台接口未返回数据。</p>
+        <p className="font-bold">{t('school.not_found')}</p>
+        <p className="text-sm mt-1">{t('school.not_found_desc', { id })}</p>
       </div>
-      <Button variant="outline" onClick={handleBack}>返回上一页</Button>
+      <Button variant="outline" onClick={handleBack}>{t('school.back')}</Button>
     </div>
   );
 
@@ -104,15 +103,26 @@ export default function SchoolDetailPage() {
            {school.school_net && <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{t('school.net')}: {school.school_net}</span>}
         </div>
 
-        {school.tags && (
-          <div className="flex flex-wrap gap-2">
-            {school.tags.split(",").map((tag, i) => (
-              <span key={i} className="border border-blue-200 text-blue-600 px-2 py-0.5 rounded text-xs">
-                {tag.trim()}
-              </span>
-            ))}
-          </div>
-        )}
+        {/* Popularity & Tags */}
+        <div className="flex flex-col gap-3">
+          {school.popularity !== undefined && (
+             <div className="flex items-center gap-1 text-orange-600 font-medium text-sm">
+               <Flame className="h-4 w-4 fill-orange-100" />
+               {school.popularity} {t('common.popularity') || '热度'}
+             </div>
+           )}
+           
+           {school.tags && (
+            <div className="flex flex-wrap gap-2">
+              {school.tags.split(',').map(tag => (
+                <span key={tag} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                  <Tag className="w-3 h-3 mr-1" />
+                  {tag.trim()}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="space-y-4 pt-4 border-t">
           <h3 className="font-semibold">学校信息</h3>

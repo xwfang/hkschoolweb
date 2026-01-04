@@ -12,6 +12,7 @@ export interface School {
   school_net?: string;
   moi?: string;
   tags?: string;
+  popularity?: number;
   website_home?: string;
   website_admission?: string;
   // TODO: Add admission events when ready
@@ -24,6 +25,7 @@ export interface SchoolSearchParams {
   gender?: string;
   religion?: string;
   name?: string;
+  sort?: string;
 }
 
 export const schoolsApi = {

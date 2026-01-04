@@ -98,6 +98,8 @@ Based on `internal/model/model.go`:
 *   **Flow**: OTP (SMS/Email) -> JWT Token.
 *   `POST /auth/login`: Send Mock OTP (123456).
 *   `POST /auth/verify`: Verify and issue JWT.
+*   **Security**: All other endpoints require `Authorization: Bearer <token>`.
+*   **Logging**: Logs now include User ID and Identifier (e.g., `User(1:parent@example.com)`).
 
 ### 4.2 Child Management (Children)
 *   **Feature**: Manage profiles for multiple children to enable personalized recommendations.

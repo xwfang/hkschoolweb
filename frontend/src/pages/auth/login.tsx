@@ -5,10 +5,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { authApi } from "@/api/auth";
+import { useTranslation } from "react-i18next";
 
 import { useAuthStore } from "@/store/auth";
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"phone" | "otp">("phone");
@@ -23,7 +25,7 @@ export default function LoginPage() {
       setError("");
     },
     onError: () => {
-      setError("发送验证码失败，请重试");
+      setError(t('auth.send_otp_error'));
     },
   });
 
@@ -35,7 +37,7 @@ export default function LoginPage() {
       navigate("/app");
     },
     onError: () => {
-      setError("验证码错误或已过期");
+      setError(t('auth.verify_error'));
     },
   });
 
@@ -52,9 +54,9 @@ export default function LoginPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>登录</CardTitle>
+        <CardTitle>{t('auth.login_title')}</CardTitle>
         <CardDescription>
-          {step === "phone" ? "请输入手机号以接收验证码" : "请输入收到的验证码"}
+          {step === "phone" ? t('auth.phone_step_desc') : t('auth.otp_step_desc')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -66,7 +68,7 @@ export default function LoginPage() {
         {step === "phone" ? (
           <Input 
             type="tel" 
-            placeholder="香港手机号 (e.g. 91234567)" 
+            placeholder={t('auth.phone_placeholder')} 
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             disabled={loginMutation.isPending}
@@ -74,7 +76,7 @@ export default function LoginPage() {
         ) : (
           <Input 
             type="text" 
-            placeholder="验证码 (e.g. 123456)" 
+            placeholder={t('auth.otp_placeholder')} 
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
             disabled={verifyMutation.isPending}
@@ -88,7 +90,7 @@ export default function LoginPage() {
             onClick={handleSendOtp} 
             disabled={!phone || loginMutation.isPending}
           >
-            {loginMutation.isPending ? "发送中..." : "发送验证码"}
+            {loginMutation.isPending ? t('auth.sending') : t('auth.send_code')}
           </Button>
         ) : (
           <Button 
@@ -96,7 +98,7 @@ export default function LoginPage() {
             onClick={handleLogin} 
             disabled={!otp || verifyMutation.isPending}
           >
-             {verifyMutation.isPending ? "登录中..." : "登录"}
+             {verifyMutation.isPending ? t('auth.logging_in') : t('auth.login')}
           </Button>
         )}
       </CardFooter>

@@ -3,12 +3,13 @@
 **Base URL**: `http://localhost:8080/api/v1`
 
 **Authentication**:
-Most endpoints require a JWT token.
+**All endpoints** (except `/auth/*` and root `/ping`) require a valid JWT token.
 - **Header**: `Authorization: Bearer <your_token>`
 
 ---
 
 ## 1. Authentication (Auth)
+*Public Access*
 
 ### 1.1 Send OTP (Login Request)
 - **Endpoint**: `POST /auth/login`
@@ -138,7 +139,7 @@ Most endpoints require a JWT token.
 ---
 
 ## 3. Schools
-*Public Access for Read, Admin for Write (currently open for dev)*
+*Requires Auth Header*
 
 ### 3.1 List Schools (Search)
 - **Endpoint**: `GET /schools`
@@ -248,7 +249,7 @@ Most endpoints require a JWT token.
 
 ---
 
-## 6. Metadata (Public)
+## 6. Metadata (Protected)
 
 ### 6.1 Get Metadata (i18n)
 - **Endpoint**: `GET /metadata`

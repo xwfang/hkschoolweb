@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { childrenApi } from "@/api/children";
 import { useMetadata } from "@/hooks/use-metadata";
+import { useTranslation } from "react-i18next";
 
 export default function AddChildPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const { districts } = useMetadata();
   const [formData, setFormData] = useState({
     name: "",
@@ -31,7 +33,7 @@ export default function AddChildPage() {
       navigate("/app/profile");
     },
     onError: () => {
-      setError("添加失败，请重试");
+      setError(t('child.add_error'));
     },
   });
 
@@ -102,12 +104,12 @@ export default function AddChildPage() {
         gender,
         resume_text: data.resume_text || analysisText || prev.resume_text
       }));
-      setSuccessMsg("AI 识别成功！已自动优化地区格式以提高匹配率。");
+      setSuccessMsg(t('child.ai_success'));
       setError("");
       // Don't auto-collapse, so user can see what happened or try again
     },
     onError: () => {
-      setError("AI 分析失败，请检查网络或稍后重试");
+      setError(t('child.ai_error'));
       setSuccessMsg("");
     }
   });
@@ -115,7 +117,7 @@ export default function AddChildPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.current_grade) {
-      setError("请填写必填项");
+      setError(t('child.validation_error'));
       return;
     }
     createMutation.mutate(formData);
@@ -139,7 +141,7 @@ export default function AddChildPage() {
         <Button variant="ghost" size="sm" className="p-0 h-8 w-8" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="font-semibold text-lg">添加子女档案</h1>
+        <h1 className="font-semibold text-lg">{t('child.add_title')}</h1>
       </div>
 
       <div className="p-4 flex-1 space-y-6">
@@ -148,7 +150,7 @@ export default function AddChildPage() {
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-sm font-semibold text-indigo-900 flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-indigo-600" />
-              AI 智能填写
+              {t('child.ai_title')}
             </h3>
             <Button 
               variant="ghost" 
@@ -156,24 +158,24 @@ export default function AddChildPage() {
               className="h-6 text-xs text-indigo-700 hover:text-indigo-900 hover:bg-indigo-100"
               onClick={() => setShowAnalysis(!showAnalysis)}
             >
-              {showAnalysis ? "收起" : "展开"}
+              {showAnalysis ? t('child.collapse') : t('child.expand')}
             </Button>
           </div>
           
           {showAnalysis && (
             <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
               <p className="text-xs text-indigo-700">
-                粘贴孩子的简介、简历或描述，AI 将自动提取信息。
+                {t('child.ai_desc')}
                 <button 
                   onClick={fillSample}
                   className="ml-2 underline font-medium hover:text-indigo-900"
                 >
-                  试一试示例
+                  {t('child.try_sample')}
                 </button>
               </p>
               <textarea
                 className="w-full min-h-[100px] rounded-md border-indigo-200 bg-white p-3 text-sm focus:border-indigo-400 focus:ring-indigo-400"
-                placeholder="在此粘贴描述（例如：我的儿子 Jason，今年读小五，想找九龙城的 Band 1 中学...）"
+                placeholder={t('child.ai_placeholder')}
                 value={analysisText}
                 onChange={(e) => setAnalysisText(e.target.value)}
               />
@@ -192,11 +194,11 @@ export default function AddChildPage() {
                 disabled={analyzeMutation.isPending || !analysisText.trim()}
               >
                 {analyzeMutation.isPending ? (
-                  <>正在分析...</>
+                  <>{t('child.ai_button_analyzing')}</>
                 ) : (
                   <>
                     <Wand2 className="h-3 w-3" />
-                    一键提取信息
+                    {t('child.ai_button')}
                   </>
                 )}
               </Button>
@@ -208,10 +210,10 @@ export default function AddChildPage() {
           <div className="space-y-4 bg-white p-4 rounded-lg shadow-sm border">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
-                姓名 <span className="text-red-500">*</span>
+                {t('child.name')} <span className="text-red-500">*</span>
               </label>
               <Input
-                placeholder="请输入姓名"
+                placeholder={t('child.name')}
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
@@ -219,7 +221,7 @@ export default function AddChildPage() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
-                性别 <span className="text-red-500">*</span>
+                {t('child.gender')} <span className="text-red-500">*</span>
               </label>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 border rounded-md px-4 py-2 flex-1 cursor-pointer hover:bg-gray-50 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
@@ -231,7 +233,7 @@ export default function AddChildPage() {
                     onChange={(e) => setFormData({ ...formData, gender: e.target.value as "M" | "F" })}
                     className="accent-blue-600"
                   />
-                  <span>男 (Boy)</span>
+                  <span>{t('child.boy')}</span>
                 </label>
                 <label className="flex items-center gap-2 border rounded-md px-4 py-2 flex-1 cursor-pointer hover:bg-gray-50 has-[:checked]:border-pink-500 has-[:checked]:bg-pink-50">
                   <input
@@ -242,59 +244,59 @@ export default function AddChildPage() {
                     onChange={(e) => setFormData({ ...formData, gender: e.target.value as "M" | "F" })}
                     className="accent-pink-600"
                   />
-                  <span>女 (Girl)</span>
+                  <span>{t('child.girl')}</span>
                 </label>
               </div>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
-                当前年级 <span className="text-red-500">*</span>
+                {t('child.current_grade')} <span className="text-red-500">*</span>
               </label>
               <select
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 value={formData.current_grade}
                 onChange={(e) => setFormData({ ...formData, current_grade: e.target.value })}
               >
-                <option value="" disabled>请选择年级</option>
+                <option value="" disabled>{t('child.select_grade')}</option>
                 <option value="K1">K1</option>
                 <option value="K2">K2</option>
                 <option value="K3">K3</option>
-                <option value="P1">P1 (小一)</option>
-                <option value="P2">P2 (小二)</option>
-                <option value="P3">P3 (小三)</option>
-                <option value="P4">P4 (小四)</option>
-                <option value="P5">P5 (小五)</option>
-                <option value="P6">P6 (小六)</option>
-                <option value="S1">S1 (中一)</option>
+                <option value="P1">P1 ({t('child.level.primary')} 1)</option>
+                <option value="P2">P2 ({t('child.level.primary')} 2)</option>
+                <option value="P3">P3 ({t('child.level.primary')} 3)</option>
+                <option value="P4">P4 ({t('child.level.primary')} 4)</option>
+                <option value="P5">P5 ({t('child.level.primary')} 5)</option>
+                <option value="P6">P6 ({t('child.level.primary')} 6)</option>
+                <option value="S1">S1 ({t('child.level.secondary')} 1)</option>
               </select>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
-                目标年级 (选填)
+                {t('child.target_grade')}
               </label>
               <select
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 value={formData.target_grade}
                 onChange={(e) => setFormData({ ...formData, target_grade: e.target.value })}
               >
-                <option value="">自动推断 (Auto)</option>
+                <option value="">{t('child.auto_infer')}</option>
                 <option value="K1">K1</option>
                 <option value="K2">K2</option>
                 <option value="K3">K3</option>
-                <option value="P1">P1 (小一)</option>
-                <option value="S1">S1 (中一)</option>
+                <option value="P1">P1 ({t('child.level.primary')} 1)</option>
+                <option value="S1">S1 ({t('child.level.secondary')} 1)</option>
               </select>
-              <p className="text-xs text-gray-500">留空则根据当前年级自动推断 (例如 P6 -&gt; S1)</p>
+              <p className="text-xs text-gray-500">{t('child.auto_infer_hint')}</p>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
-                目标地区
+                {t('child.target_districts')}
               </label>
               <Input
-                placeholder="例如: 九龙城, 湾仔 (逗号分隔)"
+                placeholder={t('child.target_districts_placeholder')}
                 value={formData.target_districts}
                 onChange={(e) => setFormData({ ...formData, target_districts: e.target.value })}
               />
@@ -302,11 +304,11 @@ export default function AddChildPage() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
-                个人简介 / 备注
+                {t('child.resume')}
               </label>
               <textarea
                 className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                placeholder="简单的自我介绍或特殊要求..."
+                placeholder={t('child.resume_placeholder')}
                 value={formData.resume_text}
                 onChange={(e) => setFormData({ ...formData, resume_text: e.target.value })}
               />
@@ -316,7 +318,7 @@ export default function AddChildPage() {
           {error && <p className="text-sm text-red-500">{error}</p>}
 
           <Button type="submit" className="w-full" disabled={createMutation.isPending}>
-            {createMutation.isPending ? "保存中..." : "保存档案"}
+            {createMutation.isPending ? t('child.saving') : t('child.save')}
           </Button>
         </form>
       </div>

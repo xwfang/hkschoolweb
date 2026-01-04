@@ -4,10 +4,121 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { applicationsApi, type Application } from "@/api/applications";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
+import { FileText, Save, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+function ApplicationCard({ app, statusMap }: { app: Application; statusMap: Record<string, { label: string; color: string }> }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [notes, setNotes] = useState(app.notes || "");
+
+  const updateMutation = useMutation({
+    mutationFn: (data: Partial<Application>) => applicationsApi.update(app.id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["applications"] });
+      setIsEditingNotes(false);
+    },
+  });
+
+  const handleSaveNotes = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    updateMutation.mutate({ notes });
+  };
+
+  const handleCancelNotes = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setNotes(app.notes || "");
+    setIsEditingNotes(false);
+  };
+
+  return (
+    <Card 
+      className="cursor-pointer active:bg-gray-50 transition-all"
+      onClick={() => navigate(`/app/school/${app.school_id}`)}
+    >
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base flex justify-between items-start gap-2">
+          <span className="line-clamp-1">{app.school?.name_cn || app.school?.name_en}</span>
+          <div onClick={(e) => e.stopPropagation()} className="shrink-0">
+            <select
+              className={`text-xs px-2 py-1 rounded-full font-normal border-0 ${statusMap[app.status]?.color || 'bg-gray-100'} cursor-pointer focus:ring-0 appearance-none pr-6 relative`}
+              value={app.status}
+              onChange={(e) => updateMutation.mutate({ status: e.target.value as Application["status"] })}
+              disabled={updateMutation.isPending}
+              style={{
+                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                  backgroundPosition: `right 0.2rem center`,
+                  backgroundRepeat: `no-repeat`,
+                  backgroundSize: `1.2em 1.2em`,
+                  paddingRight: '1.5rem'
+              }}
+            >
+               {Object.entries(statusMap).map(([key, config]) => (
+                 <option key={key} value={key} className="text-black bg-white">
+                   {config.label}
+                 </option>
+               ))}
+            </select>
+          </div>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-0 pb-3">
+        {isEditingNotes ? (
+          <div className="mt-2 space-y-2" onClick={(e) => e.stopPropagation()}>
+            <textarea 
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add notes..."
+              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+            <div className="flex justify-end gap-2">
+              <Button size="sm" variant="ghost" onClick={handleCancelNotes} className="h-7 px-2">
+                <X className="h-3.5 w-3.5 mr-1" /> {t('common.cancel') || '取消'}
+              </Button>
+              <Button size="sm" onClick={handleSaveNotes} disabled={updateMutation.isPending} className="h-7 px-2">
+                <Save className="h-3.5 w-3.5 mr-1" /> {t('common.save') || '保存'}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-1 flex items-start gap-2 group">
+             <div 
+               className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors shrink-0"
+               onClick={(e) => {
+                 e.stopPropagation();
+                 setIsEditingNotes(true);
+               }}
+             >
+               <FileText className="h-4 w-4" />
+             </div>
+             {app.notes ? (
+               <p className="text-sm text-gray-600 pt-1 line-clamp-2">{app.notes}</p>
+             ) : (
+               <p 
+                 className="text-sm text-gray-400 pt-1 italic cursor-pointer hover:text-gray-500"
+                 onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditingNotes(true);
+                 }}
+               >
+                 {t('common.add_notes') || '添加备注...'}
+               </p>
+             )}
+          </div>
+        )}
+        <div className="mt-3 text-[10px] text-gray-400 text-right">
+          {t('common.last_updated') || '最后更新'}: {new Date(app.updated_at).toLocaleDateString()}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function TrackingPage() {
   const { currentChildId } = useAuthStore();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
@@ -23,14 +134,6 @@ export default function TrackingPage() {
     queryKey: ["applications", currentChildId],
     queryFn: () => currentChildId ? applicationsApi.list(currentChildId) : null,
     enabled: !!currentChildId,
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) => 
-      applicationsApi.update(id, { status: status as Application["status"] }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["applications"] });
-    },
   });
 
   if (isError) {
@@ -50,8 +153,8 @@ export default function TrackingPage() {
   if (!currentChildId) {
     return (
       <div className="p-4 text-center mt-10">
-        <p className="text-gray-500 mb-4">请先选择一个子女来查看申请进度</p>
-        <Link to="/app/profile" className="text-primary underline">前往选择</Link>
+        <p className="text-gray-500 mb-4">{t('tracking.select_child_first') || '请先选择一个子女来查看申请进度'}</p>
+        <Link to="/app/profile" className="text-primary underline">{t('tracking.go_to_select') || '前往选择'}</Link>
       </div>
     );
   }
@@ -64,49 +167,12 @@ export default function TrackingPage() {
         <div className="text-center text-sm text-gray-500">{t('common.loading')}</div>
       ) : applications?.length === 0 ? (
         <div className="text-center text-gray-500 py-8 border rounded-lg border-dashed">
-          暂无关注的学校
+          {t('tracking.no_schools') || '暂无关注的学校'}
         </div>
       ) : (
         <div className="space-y-3">
           {applications?.map((app) => (
-            <Card 
-              key={app.id} 
-              className="cursor-pointer active:bg-gray-50"
-              onClick={() => navigate(`/app/school/${app.school_id}`)}
-            >
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex justify-between items-start">
-                  <span>{app.school?.name_cn || app.school?.name_en}</span>
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <select
-                      className={`text-xs px-2 py-1 rounded-full font-normal border-0 ${statusMap[app.status]?.color || 'bg-gray-100'} cursor-pointer focus:ring-0 appearance-none pr-6 relative`}
-                      value={app.status}
-                      onChange={(e) => {
-                        updateMutation.mutate({ id: app.id, status: e.target.value });
-                      }}
-                      disabled={updateMutation.isPending}
-                      style={{
-                          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                          backgroundPosition: `right 0.2rem center`,
-                          backgroundRepeat: `no-repeat`,
-                          backgroundSize: `1.2em 1.2em`,
-                          paddingRight: '1.5rem'
-                      }}
-                    >
-                       {Object.entries(statusMap).map(([key, config]) => (
-                         <option key={key} value={key} className="text-black bg-white">
-                           {config.label}
-                         </option>
-                       ))}
-                    </select>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm text-gray-500">
-                <p>最后更新: {new Date(app.updated_at).toLocaleDateString()}</p>
-                {app.notes && <p className="mt-1 text-gray-700 bg-gray-50 p-2 rounded">{app.notes}</p>}
-              </CardContent>
-            </Card>
+            <ApplicationCard key={app.id} app={app} statusMap={statusMap} />
           ))}
         </div>
       )}

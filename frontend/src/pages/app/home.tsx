@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, Award, BookOpen, School as SchoolIcon } from "lucide-react";
+import { Search, MapPin, Award, BookOpen, School as SchoolIcon, Info } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { childrenApi } from "@/api/children";
@@ -56,7 +56,7 @@ export default function HomePage() {
 
     // Banding (Only for Secondary)
     if (currentLevel === "Secondary") {
-      filters.push({ label: "Band 1", icon: Award, value: "Band 1", type: "banding" });
+      filters.push({ label: t('home.band_1'), icon: Award, value: "Band 1", type: "banding" });
     }
 
     // Popular Districts (Example: Kowloon City, Wan Chai)
@@ -107,6 +107,7 @@ export default function HomePage() {
     queryKey: ["schools", searchQuery, activeFilter],
     queryFn: () => schoolsApi.list({ 
       name: searchQuery,
+      sort: !searchQuery ? 'popularity' : undefined,
       ...getFilterParams()
     }),
     // Always fetch all schools if we don't have a child selected, or if we are searching/filtering
@@ -131,7 +132,7 @@ export default function HomePage() {
 
   const handleTrack = (schoolId: number) => {
     if (!currentChildId) {
-      alert("请先选择一个子女");
+      alert(t('common.select_child_alert'));
       return;
     }
     trackMutation.mutate({
@@ -170,7 +171,7 @@ export default function HomePage() {
           <ChildSwitcher />
           {currentChild && (
             <span className="text-[10px] font-medium px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full border border-indigo-100">
-              {currentLevel === "Kindergarten" ? "幼稚园" : currentLevel === "Primary" ? "小学" : "中学"}
+              {currentLevel === "Kindergarten" ? t('child.level.kindergarten') : currentLevel === "Primary" ? t('child.level.primary') : t('child.level.secondary')}
             </span>
           )}
         </div>
