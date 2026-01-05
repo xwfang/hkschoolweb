@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Send, Bot, User, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { aiApi } from "@/api/ai";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
@@ -194,18 +193,27 @@ export default function ChatPage() {
 
       {/* Input */}
       <div className="bg-white border-t p-3 safe-area-pb">
-        <form onSubmit={(e) => handleSend(e)} className="flex gap-2">
-          <Input
+        <form onSubmit={(e) => handleSend(e)} className="flex gap-2 items-end">
+          <textarea
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend(undefined);
+              }
+            }}
             placeholder={t('chat.input_placeholder')}
-            className="flex-1 bg-gray-50 focus:bg-white"
+            className={cn(
+              "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              "flex-1 bg-gray-50 focus:bg-white resize-none min-h-[80px]"
+            )}
             disabled={chatMutation.isPending}
           />
           <Button 
             type="submit" 
             size="icon" 
-            className="shrink-0 bg-indigo-600 hover:bg-indigo-700"
+            className="shrink-0 bg-indigo-600 hover:bg-indigo-700 h-10 w-10 mb-0.5"
             disabled={!inputValue.trim() || chatMutation.isPending}
           >
             <Send className="h-4 w-4" />
