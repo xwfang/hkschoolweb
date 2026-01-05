@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, Award, BookOpen, School as SchoolIcon, Info } from "lucide-react";
+import { Search, MapPin, Award, BookOpen, School as SchoolIcon, Flame, Tag } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { childrenApi } from "@/api/children";
@@ -268,6 +268,13 @@ export default function HomePage() {
                         <p className="text-xs text-gray-500 mb-2 line-clamp-1 text-left">{secondaryName}</p>
                         
                         <div className="flex flex-wrap gap-2">
+                          {school.popularity !== undefined && (
+                            <div className="flex items-center gap-1 text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded font-medium">
+                              <Flame className="h-3 w-3 fill-orange-200" />
+                              {school.popularity}
+                            </div>
+                          )}
+
                           <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded">
                             <MapPin className="h-3 w-3" />
                             {getDistrictLabel(school.district)}
@@ -276,6 +283,13 @@ export default function HomePage() {
                             <User className="h-3 w-3" />
                             {getGenderLabel(school.gender)}
                           </div>
+
+                          {school.tags && school.tags.split(',').slice(0, 2).map((tag, idx) => (
+                            <div key={`${school.id}-tag-${idx}`} className="flex items-center gap-1 text-xs text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                               <Tag className="h-3 w-3" />
+                               {tag.trim()}
+                            </div>
+                          ))}
                         </div>
                       </div>
 
