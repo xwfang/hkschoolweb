@@ -1,4 +1,5 @@
 import axios from "axios";
+import i18n from "@/i18n/config"; // Import i18n instance
 
 // Create Axios instance
 const api = axios.create({
@@ -9,13 +10,17 @@ const api = axios.create({
   },
 });
 
-// Request interceptor for adding Auth Token
+// Request interceptor for adding Auth Token and Language
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Add Accept-Language header based on current i18n language
+    config.headers["Accept-Language"] = i18n.language || "en";
+
     return config;
   },
   (error) => Promise.reject(error)
