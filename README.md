@@ -5,6 +5,13 @@ Hong Kong School Admission System.
 ## Project Structure
 
 - `frontend/`: React + TypeScript + Vite application.
+  - `deploy/`: Deployment configurations (Dockerfile, Nginx).
+  - `src/`: Source code.
+    - `api/`: API integration.
+    - `components/`: Shared UI components.
+    - `pages/`: Application pages.
+    - `store/`: State management (Zustand).
+    - `styles/`: Global styles.
 - `API_DOCS.md`: Backend API documentation.
 - `DESIGN.md`: System design documentation.
 
@@ -26,7 +33,7 @@ This project includes Docker configuration for easy deployment.
    - **Backend**: (Placeholder configuration) at `http://localhost:8080`.
 
 3. **Configuration**:
-   - The frontend Nginx configuration is located at `frontend/nginx.conf`.
+   - The frontend Nginx configuration is located at `frontend/deploy/nginx.conf`.
    - The API proxy is configured to forward `/api/` requests to `http://backend:8080/api/`.
    - You can update the backend service in `docker-compose.yml` to point to your actual backend image or build context.
 
