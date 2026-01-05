@@ -9,7 +9,7 @@ import { FileText, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function ApplicationCard({ app, statusMap }: { app: Application; statusMap: Record<string, { label: string; color: string }> }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isEditingNotes, setIsEditingNotes] = useState(false);
@@ -34,6 +34,9 @@ function ApplicationCard({ app, statusMap }: { app: Application; statusMap: Reco
     setIsEditingNotes(false);
   };
 
+  const isEnglish = i18n.language === 'en';
+  const displayName = isEnglish ? (app.school?.name_en || app.school?.name_cn) : (app.school?.name_cn || app.school?.name_en);
+
   return (
     <Card 
       className="cursor-pointer active:bg-gray-50 transition-all"
@@ -41,7 +44,7 @@ function ApplicationCard({ app, statusMap }: { app: Application; statusMap: Reco
     >
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex justify-between items-start gap-2">
-          <span className="line-clamp-1">{app.school?.name_cn || app.school?.name_en}</span>
+          <span className="line-clamp-1">{displayName}</span>
           <div onClick={(e) => e.stopPropagation()} className="shrink-0">
             <select
               className={`text-xs px-2 py-1 rounded-full font-normal border-0 ${statusMap[app.status]?.color || 'bg-gray-100'} cursor-pointer focus:ring-0 appearance-none pr-6 relative`}

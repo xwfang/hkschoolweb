@@ -16,7 +16,7 @@ import { useMetadata } from "@/hooks/use-metadata";
 import { User } from "lucide-react";
 
 export default function HomePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { getDistrictLabel, getGenderLabel, getCategoryLabel, districts, categories, genders } = useMetadata();
   const { currentChildId } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
@@ -250,18 +250,22 @@ export default function HomePage() {
               </div>
             ) : displaySchools?.map((school) => {
               const isTracked = trackedSchoolIds.has(school.id);
+              const isEnglish = i18n.language === 'en';
+              const displayName = isEnglish ? (school.name_en || school.name_cn) : (school.name_cn || school.name_en);
+              const secondaryName = isEnglish ? school.name_cn : school.name_en;
+
               return (
                 <Card key={school.id} className="cursor-pointer active:bg-gray-50 overflow-hidden border-none shadow-sm ring-1 ring-gray-100" onClick={() => navigate(`/app/school/${school.id}`)}>
                   <CardContent className="p-0">
                     <div className="p-4 flex justify-between items-start gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                           <h3 className="font-bold text-gray-900 line-clamp-1">{school.name_cn}</h3>
+                           <h3 className="font-bold text-gray-900 line-clamp-1">{displayName}</h3>
                            {school.banding && (
                              <span className="shrink-0 bg-indigo-50 text-indigo-700 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase">{school.banding}</span>
                            )}
                         </div>
-                        <p className="text-xs text-gray-500 mb-2 line-clamp-1">{school.name_en}</p>
+                        <p className="text-xs text-gray-500 mb-2 line-clamp-1">{secondaryName}</p>
                         
                         <div className="flex flex-wrap gap-2">
                           <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded">

@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useMetadata } from "@/hooks/use-metadata";
 
 export default function SchoolDetailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { getDistrictLabel, getGenderLabel, getCategoryLabel } = useMetadata();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -29,6 +29,9 @@ export default function SchoolDetailPage() {
   });
 
   const existingApplication = applications?.find(app => app.school_id === Number(id));
+  const isEnglish = i18n.language === 'en';
+  const displayName = isEnglish ? (school?.name_en || school?.name_cn) : (school?.name_cn || school?.name_en);
+  const secondaryName = isEnglish ? school?.name_cn : school?.name_en;
 
   const trackMutation = useMutation({
     mutationFn: applicationsApi.create,
@@ -85,13 +88,13 @@ export default function SchoolDetailPage() {
         <Button variant="ghost" size="sm" className="p-0 h-8 w-8" onClick={handleBack}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="font-semibold text-lg truncate flex-1">{school.name_cn}</h1>
+        <h1 className="font-semibold text-lg truncate flex-1">{displayName}</h1>
       </div>
 
       <div className="p-4 space-y-6">
         <div>
-          <h2 className="text-xl font-bold">{school.name_cn}</h2>
-          <p className="text-gray-500 text-sm">{school.name_en}</p>
+          <h2 className="text-xl font-bold">{displayName}</h2>
+          <p className="text-gray-500 text-sm">{secondaryName}</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
