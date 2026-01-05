@@ -210,7 +210,9 @@ The API supports multi-language responses for error messages and analysis text.
 
 ### 4.2 List Applications
 - **Endpoint**: `GET /applications`
-- **Query Parameter**: `child_id` (Required)
+- **Query Parameter**: `child_id` (Optional)
+  - If provided: Returns applications for the specified child.
+  - If omitted: Returns all applications for all children belonging to the authenticated user.
 - **Response**: Array of Application objects (with `school` details preloaded).
 
 ### 4.3 Update Application Status
