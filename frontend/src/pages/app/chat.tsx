@@ -40,7 +40,7 @@ export default function ChatPage() {
         {
           id: new Date().getTime().toString(),
           role: "assistant",
-          content: data.response
+          content: data.message
         }
       ]);
     },

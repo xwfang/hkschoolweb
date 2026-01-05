@@ -1,7 +1,10 @@
 import api from "./client";
+import type { School } from "./schools";
 
 export interface ChatResponse {
-  response: string;
+  message: string;
+  schools?: School[];
+  action?: "search" | "chat" | "info";
 }
 
 export const aiApi = {
