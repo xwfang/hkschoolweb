@@ -175,8 +175,8 @@ export default function TrackingPage() {
 
 
   return (
-    <div className="p-4 space-y-4">
-      <h1 className="text-xl font-bold">{t('nav.tracking')}</h1>
+    <div className="p-2 space-y-3">
+      <h1 className="text-xl font-bold px-1">{t('nav.tracking')}</h1>
       
       {isLoading ? (
         <div className="text-center text-sm text-gray-500">{t('common.loading')}</div>
