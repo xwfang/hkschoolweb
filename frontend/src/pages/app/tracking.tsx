@@ -42,7 +42,7 @@ function ApplicationCard({ app, statusMap }: { app: Application; statusMap: Reco
       className="cursor-pointer active:bg-gray-50 transition-all"
       onClick={() => navigate(`/app/school/${app.school_id}`)}
     >
-      <CardHeader className="pb-2">
+      <CardHeader className="p-3 pb-2">
         <CardTitle className="text-base flex justify-between items-start gap-2">
           <span className="line-clamp-1">{displayName}</span>
           <div onClick={(e) => e.stopPropagation()} className="shrink-0">
@@ -68,7 +68,7 @@ function ApplicationCard({ app, statusMap }: { app: Application; statusMap: Reco
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-0 pb-3">
+      <CardContent className="p-3 pt-0 pb-3">
         {isEditingNotes ? (
           <div className="mt-2 space-y-2" onClick={(e) => e.stopPropagation()}>
             <textarea 

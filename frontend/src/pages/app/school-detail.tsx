@@ -84,14 +84,14 @@ export default function SchoolDetailPage() {
   return (
     <div className="min-h-screen bg-white pb-20">
        {/* Header */}
-      <div className="bg-white px-4 h-14 flex items-center gap-3 sticky top-0 z-10 border-b">
+      <div className="bg-white px-3 h-14 flex items-center gap-3 sticky top-0 z-10 border-b">
         <Button variant="ghost" size="sm" className="p-0 h-8 w-8" onClick={handleBack}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="font-semibold text-lg truncate flex-1">{displayName}</h1>
       </div>
 
-      <div className="p-4 space-y-6">
+      <div className="p-3 space-y-6">
         <div>
           <h2 className="text-xl font-bold">{displayName}</h2>
           <p className="text-gray-500 text-sm">{secondaryName}</p>

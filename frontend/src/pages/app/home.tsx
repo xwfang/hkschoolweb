@@ -257,7 +257,7 @@ export default function HomePage() {
               return (
                 <Card key={school.id} className="cursor-pointer active:bg-gray-50 overflow-hidden border-none shadow-sm ring-1 ring-gray-100" onClick={() => navigate(`/app/school/${school.id}`)}>
                   <CardContent className="p-0">
-                    <div className="p-4 flex justify-between items-start gap-3">
+                    <div className="p-3 flex justify-between items-start gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                            <h3 className="font-bold text-gray-900 line-clamp-1">{displayName}</h3>
