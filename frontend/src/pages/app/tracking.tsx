@@ -36,6 +36,7 @@ function ApplicationCard({ app, statusMap }: { app: Application; statusMap: Reco
 
   const isEnglish = i18n.language === 'en';
   const displayName = isEnglish ? (app.school?.name_en || app.school?.name_cn) : (app.school?.name_cn || app.school?.name_en);
+  const secondaryName = isEnglish ? app.school?.name_cn : app.school?.name_en;
 
   return (
     <Card 
@@ -44,7 +45,10 @@ function ApplicationCard({ app, statusMap }: { app: Application; statusMap: Reco
     >
       <CardHeader className="p-3 pb-2">
         <CardTitle className="text-base flex justify-between items-start gap-2">
-          <span className="line-clamp-1">{displayName}</span>
+          <div className="flex flex-col items-start min-w-0">
+            <span className="line-clamp-1">{displayName}</span>
+            <span className="text-xs text-gray-500 font-normal line-clamp-1">{secondaryName}</span>
+          </div>
           <div onClick={(e) => e.stopPropagation()} className="shrink-0">
             <select
               className={`text-xs px-2 py-1 rounded-full font-normal border-0 ${statusMap[app.status]?.color || 'bg-gray-100'} cursor-pointer focus:ring-0 appearance-none pr-6 relative`}
