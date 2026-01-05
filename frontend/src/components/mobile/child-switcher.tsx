@@ -30,7 +30,7 @@ export function ChildSwitcher() {
         <div>
           <div className="flex items-center gap-1">
             <h2 className="text-base font-bold text-gray-900 leading-none">
-              {currentChild ? currentChild.name : "请选择子女"}
+              {currentChild ? currentChild.name : "所有子女"}
             </h2>
             <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
           </div>
@@ -41,6 +41,16 @@ export function ChildSwitcher() {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-50 py-1 animate-in fade-in zoom-in-95 duration-200">
+            <div
+                className={`px-4 py-2 text-sm hover:bg-gray-50 cursor-pointer flex items-center justify-between ${!currentChildId ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-700"}`}
+                onClick={() => {
+                  setCurrentChildId(null);
+                  setIsOpen(false);
+                }}
+              >
+              <span>所有子女</span>
+              {!currentChildId && <div className="h-1.5 w-1.5 rounded-full bg-indigo-600" />}
+            </div>
             {children?.map(child => (
               <div
                 key={child.id}

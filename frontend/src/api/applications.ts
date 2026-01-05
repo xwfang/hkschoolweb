@@ -26,9 +26,9 @@ export const applicationsApi = {
   },
 
   // 4.2 List Applications
-  list: async (childId: number) => {
+  list: async (childId?: number) => {
     const response = await api.get<Application[]>("/applications", {
-      params: { child_id: childId },
+      params: childId ? { child_id: childId } : {},
     });
     return response.data;
   },

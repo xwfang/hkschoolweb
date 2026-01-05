@@ -2,13 +2,14 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useAuthStore } from "@/store/auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { applicationsApi, type Application } from "@/api/applications";
-import { Link, useNavigate } from "react-router-dom";
+import { childrenApi } from "@/api/children";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
-import { FileText, Save, X } from "lucide-react";
+import { FileText, Save, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-function ApplicationCard({ app, statusMap }: { app: Application; statusMap: Record<string, { label: string; color: string }> }) {
+function ApplicationCard({ app, statusMap, childName }: { app: Application; statusMap: Record<string, { label: string; color: string }>; childName?: string }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -44,6 +45,14 @@ function ApplicationCard({ app, statusMap }: { app: Application; statusMap: Reco
       onClick={() => navigate(`/app/school/${app.school_id}`)}
     >
       <CardHeader className="p-3 pb-2">
+        {childName && (
+          <div className="flex items-center gap-1.5 mb-2">
+            <div className="bg-indigo-50 text-indigo-700 rounded-full p-1">
+              <User className="h-3 w-3" />
+            </div>
+            <span className="text-xs font-medium text-indigo-700">{childName}</span>
+          </div>
+        )}
         <div className="flex justify-between items-start gap-2">
           <div className="flex-1 min-w-0 pr-2 text-left">
             <h3 className="font-semibold text-base leading-tight tracking-tight text-gray-900 line-clamp-1 text-left">
@@ -133,6 +142,11 @@ export default function TrackingPage() {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
+  const { data: children } = useQuery({
+    queryKey: ["children"],
+    queryFn: childrenApi.list,
+  });
+
   const statusMap: Record<string, { label: string; color: string }> = {
     interested: { label: t('status.interested'), color: "bg-gray-100 text-gray-800" },
     applied: { label: t('status.applied'), color: "bg-yellow-100 text-yellow-800" },
@@ -143,8 +157,7 @@ export default function TrackingPage() {
 
   const { data: applications, isLoading, isError } = useQuery({
     queryKey: ["applications", currentChildId],
-    queryFn: () => currentChildId ? applicationsApi.list(currentChildId) : null,
-    enabled: !!currentChildId,
+    queryFn: () => applicationsApi.list(currentChildId || undefined),
   });
 
   if (isError) {
@@ -161,14 +174,7 @@ export default function TrackingPage() {
     );
   }
 
-  if (!currentChildId) {
-    return (
-      <div className="p-4 text-center mt-10">
-        <p className="text-gray-500 mb-4">{t('tracking.select_child_first') || '请先选择一个子女来查看申请进度'}</p>
-        <Link to="/app/profile" className="text-primary underline">{t('tracking.go_to_select') || '前往选择'}</Link>
-      </div>
-    );
-  }
+
 
   return (
     <div className="p-4 space-y-4">
@@ -183,7 +189,12 @@ export default function TrackingPage() {
       ) : (
         <div className="space-y-3">
           {applications?.map((app) => (
-            <ApplicationCard key={app.id} app={app} statusMap={statusMap} />
+            <ApplicationCard 
+              key={app.id} 
+              app={app} 
+              statusMap={statusMap}
+              childName={!currentChildId ? children?.find(c => c.id === app.child_id)?.name : undefined}
+            />
           ))}
         </div>
       )}

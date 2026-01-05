@@ -12,7 +12,7 @@ interface AuthState {
   user: User | null;
   currentChildId: number | null;
   setAuth: (token: string, user: User) => void;
-  setCurrentChildId: (id: number) => void;
+  setCurrentChildId: (id: number | null) => void;
   logout: () => void;
 }
 
