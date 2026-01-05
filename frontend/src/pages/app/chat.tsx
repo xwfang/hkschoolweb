@@ -7,11 +7,15 @@ import { aiApi } from "@/api/ai";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
+import type { School } from "@/api/schools";
+
 interface Message {
   id: string;
   role: "user" | "assistant";
   content?: string;
+  reasoning?: string;
   contentKey?: string;
+  schools?: School[]; // To store schools if provided in response
 }
 
 export default function ChatPage() {
@@ -40,7 +44,9 @@ export default function ChatPage() {
         {
           id: new Date().getTime().toString(),
           role: "assistant",
-          content: data.message
+          content: data.message,
+          reasoning: data.reasoning,
+          schools: data.schools
         }
       ]);
     },
@@ -120,7 +126,28 @@ export default function ChatPage() {
                   : "bg-white text-gray-800 border rounded-tl-none"
               )}
             >
+              {msg.reasoning && (
+                <div className="mb-2 p-2 bg-gray-100 rounded text-xs text-gray-500 italic border-l-2 border-indigo-300">
+                  <span className="font-semibold not-italic block mb-1">Thinking Process:</span>
+                  {msg.reasoning}
+                </div>
+              )}
               {msg.content || (msg.contentKey ? t(msg.contentKey) : "")}
+              
+              {msg.schools && msg.schools.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Found Schools</div>
+                  {msg.schools.map((school) => (
+                    <div key={school.id} className="bg-gray-50 p-2 rounded border text-left">
+                      <div className="font-medium text-indigo-700">{school.name_cn || school.name_en}</div>
+                      <div className="text-xs text-gray-500 flex gap-2 mt-1">
+                        {school.banding && <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">{school.banding}</span>}
+                        {school.district && <span className="bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded">{school.district}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {msg.role === "user" && (

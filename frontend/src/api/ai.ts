@@ -3,6 +3,7 @@ import type { School } from "./schools";
 
 export interface ChatResponse {
   message: string;
+  reasoning?: string;
   schools?: School[];
   action?: "search" | "chat" | "info";
 }
