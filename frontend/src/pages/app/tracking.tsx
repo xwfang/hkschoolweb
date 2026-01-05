@@ -46,8 +46,8 @@ function ApplicationCard({ app, statusMap }: { app: Application; statusMap: Reco
       <CardHeader className="p-3 pb-2">
         <CardTitle className="text-base flex justify-between items-start gap-2 text-left">
           <div className="flex flex-col items-start min-w-0 flex-1">
-            <span className="line-clamp-1 w-full">{displayName}</span>
-            <span className="text-xs text-gray-500 font-normal line-clamp-1 w-full">{secondaryName}</span>
+            <span className="line-clamp-1 w-full text-left">{displayName}</span>
+            <span className="text-xs text-gray-500 font-normal line-clamp-1 w-full text-left">{secondaryName}</span>
           </div>
           <div onClick={(e) => e.stopPropagation()} className="shrink-0">
             <select
