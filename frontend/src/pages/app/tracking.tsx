@@ -45,14 +45,6 @@ function ApplicationCard({ app, statusMap, childName }: { app: Application; stat
       onClick={() => navigate(`/app/school/${app.school_id}`)}
     >
       <CardHeader className="p-3 pb-2">
-        {childName && (
-          <div className="flex items-center gap-1.5 mb-2">
-            <div className="bg-indigo-50 text-indigo-700 rounded-full p-1">
-              <User className="h-3 w-3" />
-            </div>
-            <span className="text-xs font-medium text-indigo-700">{childName}</span>
-          </div>
-        )}
         <div className="flex justify-between items-start gap-2">
           <div className="flex-1 min-w-0 pr-2 text-left">
             <h3 className="font-semibold text-base leading-tight tracking-tight text-gray-900 line-clamp-1 text-left">
@@ -62,7 +54,13 @@ function ApplicationCard({ app, statusMap, childName }: { app: Application; stat
               {secondaryName}
             </p>
           </div>
-          <div onClick={(e) => e.stopPropagation()} className="shrink-0">
+          <div onClick={(e) => e.stopPropagation()} className="shrink-0 flex items-center gap-2">
+            {childName && (
+              <div className="flex items-center gap-1 bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-full">
+                <User className="h-3 w-3" />
+                <span className="text-[10px] font-medium max-w-[4rem] truncate">{childName}</span>
+              </div>
+            )}
             <select
               className={`text-xs px-2 py-1 rounded-full font-normal border-0 ${statusMap[app.status]?.color || 'bg-gray-100'} cursor-pointer focus:ring-0 appearance-none pr-6 relative`}
               value={app.status}
