@@ -40,12 +40,22 @@ graph TD
         API --> School[School Service]
         API --> Match[AI Matching Service]
         
+        API --> I18n[i18n Service]
+        
         Crawler[Crawler Service] --> DB[(SQLite DB)]
         API --> DB
     end
     
     Match --> LLM[External LLM API]
 ```
+
+### 2.3 Internationalization (i18n)
+- **Strategy**: Header-based language negotiation (`Accept-Language`).
+- **Support**: 
+  - `en` (Default)
+  - `zh-HK` (Traditional Chinese)
+  - `zh-CN` (Simplified Chinese)
+- **Scope**: Error messages, status updates, analysis text, and static metadata.
 
 ---
 

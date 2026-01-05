@@ -8,14 +8,13 @@ export interface School {
   category: string;
   banding: string;
   gender: string;
-  religion?: string;
-  school_net?: string;
-  moi?: string;
-  tags?: string;
-  popularity?: number;
-  website_home?: string;
-  website_admission?: string;
-  // TODO: Add admission events when ready
+  religion?: string; // Optional in API docs but good to have
+  school_net?: string; // Not explicitly in updated docs, but good to keep if backend sends it
+  moi?: string; // Not explicitly in updated docs
+  tags?: string; // Added in v0.6
+  popularity?: number; // Added in v0.6
+  website_home?: string; // Added in v0.6
+  website_admission?: string; // Added in v0.6
 }
 
 export interface SchoolSearchParams {
@@ -25,7 +24,7 @@ export interface SchoolSearchParams {
   gender?: string;
   religion?: string;
   name?: string;
-  sort?: string;
+  sort?: "popularity"; // Explicitly supported sort option
 }
 
 export const schoolsApi = {

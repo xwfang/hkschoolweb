@@ -7,15 +7,15 @@ export interface Child {
   current_grade: string;
   target_grade?: string;
   gender: "M" | "F";
-  target_districts: string;
+  target_districts: string; // CSV string
   resume_text?: string;
 }
 
 export interface MatchResult {
   child: string;
   matches: School[];
-  analysis?: string;
-  total_count: number;
+  analysis?: string; // Analysis text explaining the match/expansion
+  total_count: number; // Count of strict matches
   page: number;
   limit: number;
 }

@@ -2,6 +2,14 @@
 
 **Base URL**: `http://localhost:8080/api/v1`
 
+**Internationalization (i18n)**:
+The API supports multi-language responses for error messages and analysis text.
+- **Header**: `Accept-Language`
+- **Supported Values**:
+  - `en` (English, Default)
+  - `zh-HK` or `zh-TW` (Traditional Chinese)
+  - `zh-CN` (Simplified Chinese)
+
 **Authentication**:
 **All endpoints** (except `/auth/*` and root `/ping`) require a valid JWT token.
 - **Header**: `Authorization: Bearer <your_token>`
@@ -10,6 +18,8 @@
 
 ## 1. Authentication (Auth)
 *Public Access*
+
+**Note on Phone Numbers**: The system automatically normalizes phone numbers. You can input numbers without country codes (e.g., `91234567` or `13800000000`), and they will be automatically formatted to `+852` (HK) or `+86` (China) prefixes.
 
 ### 1.1 Send OTP (Login Request)
 - **Endpoint**: `POST /auth/login`
@@ -107,7 +117,8 @@
   - **Logic**:
     1. **Strict Match**: Filters by Gender (e.g., Boys/Co-ed for 'M') and Grade (e.g., Secondary for 'S1'). If `target_grade` is empty, it is inferred from `current_grade`.
     2. **District Match**: Filters by `target_districts` if set.
-    3. **Expansion Strategy**: If fewer than 5 strict matches are found in the target districts, the search automatically expands to **All Districts**.
+    3. **Expansion Strategy**: If fewer than 5 strict matches are found in the target districts, the search automatically expands to **All Districts** (removing the district filter).
+       - It maintains Gender and Grade filters.
        - It prioritizes schools by `Popularity` score (descending).
 - **Query Parameters**:
   - `page`: Page number (default: 1).
