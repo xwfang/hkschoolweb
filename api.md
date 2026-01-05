@@ -231,6 +231,7 @@ The API supports multi-language responses for error messages and analysis text.
 
 ### 5.1 Chat with AI
 - **Endpoint**: `POST /chat`
+- **Description**: Intelligent chat interface powered by LLM (Alibaba Cloud Qwen / OpenAI).
 - **Request Body**:
   ```json
   {
@@ -240,9 +241,23 @@ The API supports multi-language responses for error messages and analysis text.
 - **Response**:
   ```json
   {
-    "response": "Based on your request..."
+    "message": "I found 3 schools matching your criteria...",
+    "reasoning": "The user is looking for Band 1 schools in Shatin. I will search the database with filters: District=Sha Tin, Banding=Band 1.",
+    "schools": [
+      {
+        "id": 10,
+        "name_en": "Example School",
+        ...
+      }
+    ],
+    "action": "search" // "search", "chat", or "info"
   }
   ```
+- **Logic**:
+  - The AI automatically detects user intent ("search" vs "chat").
+  - **Reasoning**: If the model supports thinking mode (e.g., DeepSeek), this field contains the chain-of-thought.
+  - If searching, it extracts filters (District, Gender, Banding, Keywords) and queries the database.
+  - Supports multi-language responses based on `Accept-Language` header.
 
 ### 5.2 Upload Resume (Text)
 - **Endpoint**: `POST /chat/resume`
