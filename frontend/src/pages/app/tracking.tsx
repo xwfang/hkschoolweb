@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useAuthStore } from "@/store/auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { applicationsApi, type Application } from "@/api/applications";
@@ -44,10 +44,14 @@ function ApplicationCard({ app, statusMap }: { app: Application; statusMap: Reco
       onClick={() => navigate(`/app/school/${app.school_id}`)}
     >
       <CardHeader className="p-3 pb-2">
-        <CardTitle className="text-base flex justify-between items-start gap-2 text-left">
-          <div className="flex flex-col items-start min-w-0 flex-1">
-            <span className="line-clamp-1 w-full text-left">{displayName}</span>
-            <span className="text-xs text-gray-500 font-normal line-clamp-1 w-full text-left">{secondaryName}</span>
+        <div className="flex justify-between items-start gap-2">
+          <div className="flex-1 min-w-0 pr-2 text-left">
+            <h3 className="font-semibold text-base leading-tight tracking-tight text-gray-900 line-clamp-1 text-left">
+              {displayName}
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5 line-clamp-1 text-left">
+              {secondaryName}
+            </p>
           </div>
           <div onClick={(e) => e.stopPropagation()} className="shrink-0">
             <select
@@ -70,7 +74,7 @@ function ApplicationCard({ app, statusMap }: { app: Application; statusMap: Reco
                ))}
             </select>
           </div>
-        </CardTitle>
+        </div>
       </CardHeader>
       <CardContent className="p-3 pt-0 pb-3">
         {isEditingNotes ? (
