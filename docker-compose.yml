@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    restart: always
+    depends_on:
+      - backend
+
+  # Placeholder for backend service
+  # Replace image or build context with your actual backend details
+  backend:
+    image: golang:1.21-alpine # Example image
+    # build: ./backend  <-- If you have backend source code
+    ports:
+      - "8080:8080"
+    # command: go run main.go
+    restart: always
+    environment:
+      - PORT=8080

@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create Axios instance
 const api = axios.create({
-  baseURL: "/api/v1", // Use relative path to leverage Vite proxy
+  baseURL: import.meta.env.VITE_API_URL || "/api/v1", // Use env var or default to relative path
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
