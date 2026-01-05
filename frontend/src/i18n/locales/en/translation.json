@@ -1,0 +1,157 @@
+{
+  "app": {
+    "name": "HK School Web"
+  },
+  "nav": {
+    "home": "Discover",
+    "chat": "Assistant",
+    "tracking": "Tracking",
+    "profile": "Me"
+  },
+  "home": {
+    "search_placeholder": "Search school name...",
+    "band_1": "Band 1",
+    "quick_filters": "Quick Filters",
+    "ai_recommendation": "AI Recommendation",
+    "all_schools": "All Schools",
+    "no_matches": "No matches found",
+    "no_matches_fallback": "No personalized matches found for this child, showing popular schools.",
+    "loading": "Loading schools...",
+    "filter_results": "Filter Results",
+    "popular_schools": "Popular Schools",
+    "recommended_for_you": "Recommended for You",
+    "clear_filters": "Clear Filters"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "select_language": "Select Language",
+    "back": "Back"
+  },
+  "auth": {
+    "login_title": "Login",
+    "phone_step_desc": "Enter mobile number to receive verification code",
+    "otp_step_desc": "Enter the verification code received",
+    "send_otp_error": "Failed to send verification code, please try again",
+    "verify_error": "Invalid or expired verification code",
+    "phone_placeholder": "HK Mobile Number (e.g. 91234567)",
+    "otp_placeholder": "Verification Code (e.g. 123456)",
+    "sending": "Sending...",
+    "send_code": "Send Code",
+    "logging_in": "Logging in...",
+    "login": "Login"
+  },
+  "profile": {
+    "title": "Profile",
+    "children": "My Children",
+    "add_child": "Add Child",
+    "logout": "Logout",
+    "settings": "Settings",
+    "select_child_hint": "Select a child to view details",
+    "user_title": "Parent User",
+    "grade": "Grade",
+    "target": "Target",
+    "edit": "Edit"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "error": "Error",
+    "follow": "Follow",
+    "followed": "Followed",
+    "add_notes": "Add notes...",
+    "last_updated": "Last updated",
+    "retry": "Retry",
+    "select_child_alert": "Please select a child first",
+    "loading_error": "Loading failed",
+    "popularity": "Popularity"
+  },
+  "child": {
+    "add_title": "Add Child Profile",
+    "ai_title": "AI Smart Fill",
+    "ai_desc": "Paste child's intro, resume or description, AI will extract info automatically.",
+    "ai_placeholder": "Paste description here (e.g. My son Jason is in P5, looking for Band 1 school in Kowloon City...)",
+    "ai_button_analyzing": "Analyzing...",
+    "ai_button": "Extract Info",
+    "ai_success": "AI analysis successful! District format optimized for better matching.",
+    "ai_error": "AI analysis failed, please check network or try again later",
+    "try_sample": "Try Sample",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "name": "Name",
+    "gender": "Gender",
+    "boy": "Boy",
+    "girl": "Girl",
+    "current_grade": "Current Grade",
+    "select_grade": "Select Grade",
+    "target_grade": "Target Grade (Optional)",
+    "auto_infer": "Auto Infer",
+    "auto_infer_hint": "Leave empty to infer from current grade (e.g. P6 -> S1)",
+    "target_districts": "Target Districts",
+    "target_districts_placeholder": "e.g. Kowloon City, Wan Chai (comma separated)",
+    "resume": "Bio / Notes",
+    "resume_placeholder": "Brief introduction or special requirements...",
+    "save": "Save Profile",
+    "saving": "Saving...",
+    "validation_error": "Please fill in required fields",
+    "add_error": "Failed to add, please try again",
+    "level": {
+      "kindergarten": "Kindergarten",
+      "primary": "Primary",
+      "secondary": "Secondary"
+    }
+  },
+  "school": {
+    "net": "School Net",
+    "not_found": "School info not found",
+    "not_found_desc": "School ID ({id}) might not exist or backend returned no data.",
+    "back": "Back",
+    "info_title": "School Info",
+    "type": "Type",
+    "district": "District",
+    "moi": "MOI",
+    "religion": "Religion",
+    "admission_info": "Admission Info",
+    "admission_info_desc": "Latest admission notice not yet fetched. Please check the official website via 'Admission Page' below.",
+    "website": "Website",
+    "admission_page": "Admission Page",
+    "view_admission_info": "View Admission Info",
+    "admission_info_found_desc": "Please click the button below to view latest admission info.",
+    "current_status": "Current Status",
+    "add_to_tracking": "Add to Tracking",
+    "no_info": "No Info",
+    "none": "None"
+  },
+  "tracking": {
+    "no_schools": "No schools followed yet",
+    "select_child_first": "Please select a child first to view application progress",
+    "go_to_select": "Go to select"
+  },
+  "status": {
+    "interested": "Interested",
+    "applied": "Applied",
+    "interview": "Interview",
+    "offer": "Offer",
+    "rejected": "Rejected"
+  },
+
+  "chat": {
+    "title": "AI Assistant",
+    "welcome": "Hello! I am your school admission assistant. Ask me anything about Hong Kong school applications, e.g., 'What are the Band 1 boys' schools in Kowloon City?' or 'How to prepare for DSS school interviews?'",
+    "input_placeholder": "Ask AI...",
+    "quick_action": {
+      "letter": "Cover Letter",
+      "interview": "Interview Prep",
+      "resume": "Resume Analysis"
+    },
+    "prompt": {
+      "letter": "Please write a cover letter for [Child's Name] applying to [Target School], highlighting [Strengths]...",
+      "interview": "I want to prepare for a DSS secondary school interview. Please act as an interviewer and ask me questions.",
+      "resume": "Please analyze my child's resume for strengths and weaknesses: [Paste Resume Content]"
+    },
+    "error": "Sorry, I encountered an issue. Please try again later.",
+    "thinking": "Thinking..."
+  }
+}

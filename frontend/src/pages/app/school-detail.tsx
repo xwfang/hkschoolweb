@@ -125,46 +125,63 @@ export default function SchoolDetailPage() {
         </div>
 
         <div className="space-y-4 pt-4 border-t">
-          <h3 className="font-semibold">学校信息</h3>
+          <h3 className="font-semibold">{t('school.info_title')}</h3>
           
           <div className="grid grid-cols-2 gap-4 text-sm">
              <div>
-               <p className="text-gray-500">类型</p>
+               <p className="text-gray-500">{t('school.type')}</p>
                <p>{school.category}</p>
              </div>
              <div>
-               <p className="text-gray-500">地区</p>
+               <p className="text-gray-500">{t('school.district')}</p>
                <p>{school.district}</p>
              </div>
              <div>
-               <p className="text-gray-500">授课语言</p>
-               <p>{school.moi || "暂无信息"}</p>
+               <p className="text-gray-500">{t('school.moi')}</p>
+               <p>{school.moi || t('school.no_info')}</p>
              </div>
              <div>
-               <p className="text-gray-500">宗教</p>
-               <p>{school.religion || "无"}</p>
+               <p className="text-gray-500">{t('school.religion')}</p>
+               <p>{school.religion || t('school.none')}</p>
              </div>
           </div>
 
           {/* Placeholder for Admission Dates */}
           <div className="bg-yellow-50 p-3 rounded-md border border-yellow-100">
-             <h4 className="font-medium text-yellow-800 mb-2 text-sm">📅 插班招生信息</h4>
-             <p className="text-xs text-yellow-700">
-               目前尚未抓取到该校的最新插班通告。请点击下方“入学申请页面”前往官网查看。
-             </p>
+             <h4 className="font-medium text-yellow-800 mb-2 text-sm">📅 {t('school.admission_info')}</h4>
+             
+             {school.website_admission ? (
+               <>
+                 <p className="text-xs text-yellow-700 mb-3">
+                   {t('school.admission_info_found_desc', '请点击下方按钮查看最新插班/招生资讯。')}
+                 </p>
+                 <Button 
+                   size="sm" 
+                   className="w-full bg-yellow-600 hover:bg-yellow-700 text-white border-none shadow-sm"
+                   onClick={() => window.open(school.website_admission, "_blank")}
+                 >
+                   <ExternalLink className="h-4 w-4 mr-2" />
+                   {t('school.view_admission_info', '查看招生详情')}
+                 </Button>
+               </>
+             ) : (
+               <p className="text-xs text-yellow-700">
+                 {t('school.admission_info_desc')}
+               </p>
+             )}
           </div>
 
           <div className="space-y-3">
             {school.website_home && (
               <a href={school.website_home} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline">
                 <Globe className="h-4 w-4" />
-                学校官网
+                {t('school.website')}
               </a>
             )}
             {school.website_admission && (
               <a href={school.website_admission} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline">
                 <ExternalLink className="h-4 w-4" />
-                入学申请页面
+                {t('school.admission_page')}
               </a>
             )}
           </div>
@@ -173,7 +190,7 @@ export default function SchoolDetailPage() {
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t safe-area-pb">
           {existingApplication ? (
             <div className="space-y-2">
-              <label className="text-xs text-gray-500">当前状态</label>
+              <label className="text-xs text-gray-500">{t('school.current_status')}</label>
               <select 
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 value={existingApplication.status}
@@ -183,11 +200,11 @@ export default function SchoolDetailPage() {
                 })}
                 disabled={updateMutation.isPending}
               >
-                <option value="interested">已关注</option>
-                <option value="applied">已报名</option>
-                <option value="interview">面试中</option>
-                <option value="offer">已录取</option>
-                <option value="rejected">未获录</option>
+                <option value="interested">{t('status.interested')}</option>
+                <option value="applied">{t('status.applied')}</option>
+                <option value="interview">{t('status.interview')}</option>
+                <option value="offer">{t('status.offer')}</option>
+                <option value="rejected">{t('status.rejected')}</option>
               </select>
             </div>
           ) : (
@@ -197,7 +214,7 @@ export default function SchoolDetailPage() {
               disabled={trackMutation.isPending}
               onClick={handleTrack}
             >
-              添加到追踪列表
+              {t('school.add_to_tracking')}
             </Button>
           )}
         </div>

@@ -1,0 +1,157 @@
+{
+  "app": {
+    "name": "香港擇校助手"
+  },
+  "nav": {
+    "home": "擇校",
+    "chat": "AI 助手",
+    "tracking": "進度",
+    "profile": "我的"
+  },
+  "home": {
+    "search_placeholder": "搜索學校名稱...",
+    "band_1": "Band 1",
+    "quick_filters": "快速篩選",
+    "ai_recommendation": "AI 擇校建議",
+    "all_schools": "所有學校",
+    "no_matches": "未找到匹配的學校",
+    "no_matches_fallback": "暫無針對該子女的個性化匹配，為您展示熱門學校。",
+    "loading": "正在加載學校數據...",
+    "filter_results": "篩選結果",
+    "popular_schools": "熱門學校",
+    "recommended_for_you": "為您推薦",
+    "clear_filters": "清除篩選"
+  },
+  "settings": {
+    "title": "設置",
+    "language": "語言",
+    "select_language": "選擇語言",
+    "back": "返回"
+  },
+  "auth": {
+    "login_title": "登錄",
+    "phone_step_desc": "請輸入手機號以接收驗證碼",
+    "otp_step_desc": "請輸入收到的驗證碼",
+    "send_otp_error": "發送驗證碼失敗，請重試",
+    "verify_error": "驗證碼錯誤或已過期",
+    "phone_placeholder": "香港手機號 (e.g. 91234567)",
+    "otp_placeholder": "驗證碼 (e.g. 123456)",
+    "sending": "發送中...",
+    "send_code": "發送驗證碼",
+    "logging_in": "登錄中...",
+    "login": "登錄"
+  },
+  "profile": {
+    "title": "個人中心",
+    "children": "我的子女",
+    "add_child": "添加子女",
+    "logout": "退出登錄",
+    "settings": "設置",
+    "select_child_hint": "請選擇一個子女以查看詳情",
+    "user_title": "家長用戶",
+    "grade": "年級",
+    "target": "目標",
+    "edit": "編輯"
+  },
+  "common": {
+    "loading": "加載中...",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "確認",
+    "error": "錯誤",
+    "follow": "關注",
+    "followed": "已關注",
+    "add_notes": "添加備註...",
+    "last_updated": "最後更新",
+    "retry": "重試",
+    "select_child_alert": "請先選擇一個子女",
+    "loading_error": "加載失敗",
+    "popularity": "熱度"
+  },
+  "child": {
+    "add_title": "添加子女檔案",
+    "ai_title": "AI 智能填寫",
+    "ai_desc": "粘貼孩子的簡介、簡歷或描述，AI 將自動提取信息。",
+    "ai_placeholder": "在此粘貼描述（例如：我的兒子 Jason，今年讀小五，想找九龍城的 Band 1 中學...）",
+    "ai_button_analyzing": "正在分析...",
+    "ai_button": "一鍵提取信息",
+    "ai_success": "AI 識別成功！已自動優化地區格式以提高匹配率。",
+    "ai_error": "AI 分析失敗，請檢查網絡或稍後重試",
+    "try_sample": "試一試示例",
+    "expand": "展開",
+    "collapse": "收起",
+    "name": "姓名",
+    "gender": "性別",
+    "boy": "男 (Boy)",
+    "girl": "女 (Girl)",
+    "current_grade": "當前年級",
+    "select_grade": "請選擇年級",
+    "target_grade": "目標年級 (選填)",
+    "auto_infer": "自動推斷 (Auto)",
+    "auto_infer_hint": "留空則根據當前年級自動推斷 (例如 P6 -> S1)",
+    "target_districts": "目標地區",
+    "target_districts_placeholder": "例如: 九龍城, 灣仔 (逗號分隔)",
+    "resume": "個人簡介 / 備註",
+    "resume_placeholder": "簡單的自我介紹或特殊要求...",
+    "save": "保存檔案",
+    "saving": "保存中...",
+    "validation_error": "請填寫必填項",
+    "add_error": "添加失敗，請重試",
+    "level": {
+      "kindergarten": "幼稚園",
+      "primary": "小學",
+      "secondary": "中學"
+    }
+  },
+  "school": {
+    "net": "校網",
+    "not_found": "無法加載學校信息",
+    "not_found_desc": "可能是該學校 ID ({id}) 不存在，或者後台接口未返回數據。",
+    "back": "返回上一頁",
+    "info_title": "學校信息",
+    "type": "類型",
+    "district": "地區",
+    "moi": "授課語言",
+    "religion": "宗教",
+    "admission_info": "插班招生信息",
+    "admission_info_desc": "目前尚未抓取到該校的最新插班通告。請點擊下方「入學申請頁面」前往官網查看。",
+    "website": "學校官網",
+    "admission_page": "入學申請頁面",
+    "view_admission_info": "查看招生詳情",
+    "admission_info_found_desc": "請點擊下方按鈕查看最新插班/招生資訊。",
+    "current_status": "當前狀態",
+    "add_to_tracking": "添加到追蹤列表",
+    "no_info": "暫無信息",
+    "none": "無"
+  },
+  "tracking": {
+    "no_schools": "暫無關注的學校",
+    "select_child_first": "請先選擇一個子女來查看申請進度",
+    "go_to_select": "前往選擇"
+  },
+  "status": {
+    "interested": "已關注",
+    "applied": "已報名",
+    "interview": "面試中",
+    "offer": "已錄取",
+    "rejected": "未獲錄"
+  },
+
+  "chat": {
+    "title": "AI 助手",
+    "welcome": "您好！我是您的升學助手。您可以問我任何關於香港學校申請的問題，例如：「九龍城有哪些 Band 1 男校？」 或 「如何準備直資中學的面試？」",
+    "input_placeholder": "問問 AI...",
+    "quick_action": {
+      "letter": "寫自薦信",
+      "interview": "面試模擬",
+      "resume": "簡歷分析"
+    },
+    "prompt": {
+      "letter": "請幫我為 [孩子姓名] 寫一封申請 [目標學校] 的自薦信，突出 [特長]...",
+      "interview": "我要準備直資中學的面試，請扮演面試官向我提問。",
+      "resume": "請分析我孩子的簡歷優勢和劣勢：[粘貼簡歷內容]"
+    },
+    "error": "抱歉，我遇到了一些問題，請稍後再試。",
+    "thinking": "正在思考..."
+  }
+}

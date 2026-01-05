@@ -1,0 +1,157 @@
+{
+  "app": {
+    "name": "香港择校助手"
+  },
+  "nav": {
+    "home": "择校",
+    "chat": "AI 助手",
+    "tracking": "进度",
+    "profile": "我的"
+  },
+  "home": {
+    "search_placeholder": "搜索学校名称...",
+    "band_1": "Band 1",
+    "quick_filters": "快速筛选",
+    "ai_recommendation": "AI 择校建议",
+    "all_schools": "所有学校",
+    "no_matches": "未找到匹配的学校",
+    "no_matches_fallback": "暂无针对该子女的个性化匹配，为您展示热门学校。",
+    "loading": "正在加载学校数据...",
+    "filter_results": "筛选结果",
+    "popular_schools": "热门学校",
+    "recommended_for_you": "为您推荐",
+    "clear_filters": "清除筛选"
+  },
+  "settings": {
+    "title": "设置",
+    "language": "语言",
+    "select_language": "选择语言",
+    "back": "返回"
+  },
+  "auth": {
+    "login_title": "登录",
+    "phone_step_desc": "请输入手机号以接收验证码",
+    "otp_step_desc": "请输入收到的验证码",
+    "send_otp_error": "发送验证码失败，请重试",
+    "verify_error": "验证码错误或已过期",
+    "phone_placeholder": "香港手机号 (e.g. 91234567)",
+    "otp_placeholder": "验证码 (e.g. 123456)",
+    "sending": "发送中...",
+    "send_code": "发送验证码",
+    "logging_in": "登录中...",
+    "login": "登录"
+  },
+  "profile": {
+    "title": "个人中心",
+    "children": "我的子女",
+    "add_child": "添加子女",
+    "logout": "退出登录",
+    "settings": "设置",
+    "select_child_hint": "请选择一个子女以查看详情",
+    "user_title": "家长用户",
+    "grade": "年级",
+    "target": "目标",
+    "edit": "编辑"
+  },
+  "common": {
+    "loading": "加载中...",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确认",
+    "error": "错误",
+    "follow": "关注",
+    "followed": "已关注",
+    "add_notes": "添加备注...",
+    "last_updated": "最后更新",
+    "retry": "重试",
+    "select_child_alert": "请先选择一个子女",
+    "loading_error": "加载失败",
+    "popularity": "热度"
+  },
+  "child": {
+    "add_title": "添加子女档案",
+    "ai_title": "AI 智能填写",
+    "ai_desc": "粘贴孩子的简介、简历或描述，AI 将自动提取信息。",
+    "ai_placeholder": "在此粘贴描述（例如：我的儿子 Jason，今年读小五，想找九龙城的 Band 1 中学...）",
+    "ai_button_analyzing": "正在分析...",
+    "ai_button": "一键提取信息",
+    "ai_success": "AI 识别成功！已自动优化地区格式以提高匹配率。",
+    "ai_error": "AI 分析失败，请检查网络或稍后重试",
+    "try_sample": "试一试示例",
+    "expand": "展开",
+    "collapse": "收起",
+    "name": "姓名",
+    "gender": "性别",
+    "boy": "男 (Boy)",
+    "girl": "女 (Girl)",
+    "current_grade": "当前年级",
+    "select_grade": "请选择年级",
+    "target_grade": "目标年级 (选填)",
+    "auto_infer": "自动推断 (Auto)",
+    "auto_infer_hint": "留空则根据当前年级自动推断 (例如 P6 -> S1)",
+    "target_districts": "目标地区",
+    "target_districts_placeholder": "例如: 九龙城, 湾仔 (逗号分隔)",
+    "resume": "个人简介 / 备注",
+    "resume_placeholder": "简单的自我介绍或特殊要求...",
+    "save": "保存档案",
+    "saving": "保存中...",
+    "validation_error": "请填写必填项",
+    "add_error": "添加失败，请重试",
+    "level": {
+      "kindergarten": "幼稚园",
+      "primary": "小学",
+      "secondary": "中学"
+    }
+  },
+  "school": {
+    "net": "校网",
+    "not_found": "无法加载学校信息",
+    "not_found_desc": "可能是该学校 ID ({id}) 不存在，或者后台接口未返回数据。",
+    "back": "返回上一页",
+    "info_title": "学校信息",
+    "type": "类型",
+    "district": "地区",
+    "moi": "授课语言",
+    "religion": "宗教",
+    "admission_info": "插班招生信息",
+    "admission_info_desc": "目前尚未抓取到该校的最新插班通告。请点击下方“入学申请页面”前往官网查看。",
+    "website": "学校官网",
+    "admission_page": "入学申请页面",
+    "view_admission_info": "查看招生详情",
+    "admission_info_found_desc": "请点击下方按钮查看最新插班/招生资讯。",
+    "current_status": "当前状态",
+    "add_to_tracking": "添加到追踪列表",
+    "no_info": "暂无信息",
+    "none": "无"
+  },
+  "tracking": {
+    "no_schools": "暂无关注的学校",
+    "select_child_first": "请先选择一个子女来查看申请进度",
+    "go_to_select": "前往选择"
+  },
+  "status": {
+    "interested": "已关注",
+    "applied": "已报名",
+    "interview": "面试中",
+    "offer": "已录取",
+    "rejected": "未获录"
+  },
+
+  "chat": {
+    "title": "AI 助手",
+    "welcome": "您好！我是您的升学助手。您可以问我任何关于香港学校申请的问题，例如：“九龙城有哪些 Band 1 男校？” 或 “如何准备直资中学的面试？”",
+    "input_placeholder": "问问 AI...",
+    "quick_action": {
+      "letter": "写自荐信",
+      "interview": "面试模拟",
+      "resume": "简历分析"
+    },
+    "prompt": {
+      "letter": "请帮我为 [孩子姓名] 写一封申请 [目标学校] 的自荐信，突出 [特长]...",
+      "interview": "我要准备直资中学的面试，请扮演面试官向我提问。",
+      "resume": "请分析我孩子的简历优势和劣势：[粘贴简历内容]"
+    },
+    "error": "抱歉，我遇到了一些问题，请稍后再试。",
+    "thinking": "正在思考..."
+  }
+}

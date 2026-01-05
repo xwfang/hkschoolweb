@@ -18,6 +18,16 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
 
+  const getFormattedIdentifier = (input: string) => {
+    // Basic check for HK phone number: 8 digits starting with 4, 5, 6, 7, 8, 9
+    // If it matches, we assume it's a HK number and prepend +852
+    const hkPhoneRegex = /^[4-9]\d{7}$/;
+    if (hkPhoneRegex.test(input)) {
+      return `+852${input}`;
+    }
+    return input;
+  };
+
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: () => {
@@ -43,12 +53,14 @@ export default function LoginPage() {
 
   const handleSendOtp = () => {
     if (!phone) return;
-    loginMutation.mutate(phone);
+    const identifier = getFormattedIdentifier(phone);
+    loginMutation.mutate(identifier);
   };
 
   const handleLogin = () => {
     if (!otp) return;
-    verifyMutation.mutate({ identifier: phone, code: otp });
+    const identifier = getFormattedIdentifier(phone);
+    verifyMutation.mutate({ identifier, code: otp });
   };
 
   return (
