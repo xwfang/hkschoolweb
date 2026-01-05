@@ -12,7 +12,13 @@ import SchoolDetailPage from "@/pages/app/school-detail";
 import ChatPage from "@/pages/app/chat";
 import SettingsPage from "@/pages/app/settings";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+    },
+  },
+});
 
 function App() {
   return (
