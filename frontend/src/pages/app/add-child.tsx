@@ -1,14 +1,16 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Sparkles, Wand2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, Sparkles, Wand2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { childrenApi } from "@/api/children";
+import { childrenApi, type Child } from "@/api/children";
 import { useMetadata } from "@/hooks/use-metadata";
 import { useTranslation } from "react-i18next";
 
 export default function AddChildPage() {
+  const { id } = useParams();
+  const isEditMode = !!id;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
@@ -22,9 +24,36 @@ export default function AddChildPage() {
     resume_text: "",
   });
   const [analysisText, setAnalysisText] = useState("");
-  const [showAnalysis, setShowAnalysis] = useState(true);
+  const [showAnalysis, setShowAnalysis] = useState(!isEditMode);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+
+  // Fetch child data if in edit mode
+  const { data: childData } = useQuery({
+    queryKey: ["child", id],
+    queryFn: async () => {
+      if (!id) return null;
+      // Since we don't have a dedicated get-by-id endpoint in childrenApi yet, 
+      // we'll fetch all and find one, or just assume the user came from the list.
+      // Optimally, backend should support GET /children/:id
+      const all = await childrenApi.list();
+      return all.find(c => c.id === Number(id));
+    },
+    enabled: isEditMode,
+  });
+
+  useEffect(() => {
+    if (childData) {
+      setFormData({
+        name: childData.name,
+        gender: childData.gender,
+        current_grade: childData.current_grade,
+        target_grade: childData.target_grade || "",
+        target_districts: childData.target_districts || "",
+        resume_text: childData.resume_text || "",
+      });
+    }
+  }, [childData]);
 
   const createMutation = useMutation({
     mutationFn: childrenApi.create,
@@ -34,6 +63,25 @@ export default function AddChildPage() {
     },
     onError: () => {
       setError(t('child.add_error'));
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (data: Partial<Child>) => childrenApi.update(Number(id), data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["children"] });
+      navigate("/app/profile");
+    },
+    onError: () => {
+      setError(t('child.update_error') || 'Update failed');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => childrenApi.delete(Number(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["children"] });
+      navigate("/app/profile");
     },
   });
 
@@ -120,7 +168,18 @@ export default function AddChildPage() {
       setError(t('child.validation_error'));
       return;
     }
-    createMutation.mutate(formData);
+    
+    if (isEditMode) {
+      updateMutation.mutate(formData);
+    } else {
+      createMutation.mutate(formData);
+    }
+  };
+
+  const handleDelete = () => {
+    if (window.confirm(t('child.delete_confirm') || 'Are you sure you want to delete this child profile?')) {
+      deleteMutation.mutate();
+    }
   };
 
   const handleAnalyze = () => {
@@ -141,7 +200,19 @@ export default function AddChildPage() {
         <Button variant="ghost" size="sm" className="p-0 h-8 w-8" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="font-semibold text-lg">{t('child.add_title')}</h1>
+        <h1 className="font-semibold text-lg">
+          {isEditMode ? t('child.edit_title') || 'Edit Child' : t('child.add_title')}
+        </h1>
+        {isEditMode && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="ml-auto text-red-500 hover:text-red-600 hover:bg-red-50"
+            onClick={handleDelete}
+          >
+            <Trash2 className="h-5 w-5" />
+          </Button>
+        )}
       </div>
 
       <div className="p-4 flex-1 space-y-6">

@@ -42,6 +42,7 @@ function App() {
           </Route>
 
           <Route path="/app/profile/add-child" element={<AddChildPage />} />
+          <Route path="/app/profile/edit-child/:id" element={<AddChildPage />} />
           <Route path="/app/profile/settings" element={<SettingsPage />} />
           <Route path="/app/school/:id" element={<SchoolDetailPage />} />
 

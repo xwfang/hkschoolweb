@@ -65,7 +65,16 @@ export default function ProfilePage() {
                     {t('profile.grade')}: {child.current_grade} {child.target_grade ? `-> ${child.target_grade}` : ""} | {t('profile.target')}: {child.target_districts}
                   </p>
                 </div>
-                <Button variant="outline" size="sm">{t('profile.edit')}</Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/app/profile/edit-child/${child.id}`);
+                  }}
+                >
+                  {t('profile.edit')}
+                </Button>
               </CardContent>
             </Card>
           ))
