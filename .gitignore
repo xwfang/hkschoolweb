@@ -28,4 +28,6 @@ temp_data/
 *.json
 !package.json
 !tsconfig.json
+!frontend/tsconfig.app.json
+!frontend/tsconfig.node.json
 !frontend/src/i18n/locales/**/*.json
