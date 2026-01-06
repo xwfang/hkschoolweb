@@ -2,6 +2,7 @@ import api from "./client";
 import type { School } from "./schools";
 
 export interface ChatResponse {
+  session_id?: number;
   message: string;
   reasoning?: string;
   schools?: School[];
@@ -10,8 +11,8 @@ export interface ChatResponse {
 
 export const aiApi = {
   // 5.1 Chat with AI
-  chat: async (message: string) => {
-    const response = await api.post<ChatResponse>("/chat", { message });
+  chat: async (message: string, sessionId?: number) => {
+    const response = await api.post<ChatResponse>("/chat", { message, session_id: sessionId });
     return response.data;
   },
 

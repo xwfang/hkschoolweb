@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { aiApi } from "@/api/ai";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { AxiosError } from "axios";
 
 import type { School } from "@/api/schools";
 
@@ -26,6 +27,7 @@ export default function ChatPage() {
       contentKey: 'chat.welcome'
     }
   ]);
+  const [sessionId, setSessionId] = useState<number | undefined>();
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -36,8 +38,11 @@ export default function ChatPage() {
   ];
 
   const chatMutation = useMutation({
-    mutationFn: aiApi.chat,
+    mutationFn: (vars: { message: string; sessionId?: number }) => aiApi.chat(vars.message, vars.sessionId),
     onSuccess: (data) => {
+      if (data.session_id) {
+        setSessionId(data.session_id);
+      }
       setMessages((prev) => [
         ...prev,
         {
@@ -49,13 +54,18 @@ export default function ChatPage() {
         }
       ]);
     },
-    onError: () => {
+    onError: (error: AxiosError) => {
+      let errorMessage = t('chat.error');
+      if (error?.response?.status === 429) {
+        errorMessage = t('chat.rate_limit_error') || "Daily usage limit exceeded. Please try again tomorrow.";
+      }
+      
       setMessages((prev) => [
         ...prev,
         {
           id: new Date().getTime().toString(),
           role: "assistant",
-          content: t('chat.error')
+          content: errorMessage
         }
       ]);
     }
@@ -85,7 +95,7 @@ export default function ChatPage() {
 
     setMessages((prev) => [...prev, userMsg]);
     setInputValue("");
-    chatMutation.mutate(userMsg.content || "");
+    chatMutation.mutate({ message: userMsg.content || "", sessionId });
   };
 
   return (

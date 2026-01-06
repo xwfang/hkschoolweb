@@ -152,6 +152,7 @@
       "resume": "Please analyze my child's resume for strengths and weaknesses: [Paste Resume Content]"
     },
     "error": "Sorry, I encountered an issue. Please try again later.",
+    "rate_limit_error": "Daily usage limit exceeded. Please try again tomorrow.",
     "thinking": "Thinking..."
   }
 }
