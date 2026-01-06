@@ -4,7 +4,7 @@ import i18n from "@/i18n/config"; // Import i18n instance
 // Create Axios instance
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "/api/v1", // Use env var or default to relative path
-  timeout: 10000,
+  timeout: 60000, // Increased timeout to 60s for AI endpoints
   headers: {
     "Content-Type": "application/json",
   },
