@@ -14,6 +14,12 @@ The API supports multi-language responses for error messages and analysis text.
 **All endpoints** (except `/auth/*` and root `/ping`) require a valid JWT token.
 - **Header**: `Authorization: Bearer <your_token>`
 
+**Rate Limits**:
+LLM-powered endpoints have a daily usage limit per user.
+- **Limit**: 3 requests per day.
+- **Endpoints**: `/chat`, `/chat/resume`, `/children/analyze`.
+- **Error**: `429 Too Many Requests` with message "Daily usage limit exceeded".
+
 ---
 
 ## 1. Authentication (Auth)
@@ -82,7 +88,8 @@ The API supports multi-language responses for error messages and analysis text.
 
 ### 2.2 Analyze Child Profile (AI)
 - **Endpoint**: `POST /children/analyze`
-- **Description**: Parses unstructured text to extract child profile details. (Currently uses basic keyword matching).
+- **Description**: Parses unstructured text to extract child profile details using LLM.
+- **Rate Limit**: Counts towards the daily limit (3/day).
 - **Request Body**:
   ```json
   {
@@ -231,16 +238,18 @@ The API supports multi-language responses for error messages and analysis text.
 
 ### 5.1 Chat with AI
 - **Endpoint**: `POST /chat`
-- **Description**: Intelligent chat interface powered by LLM (Alibaba Cloud Qwen / OpenAI).
+- **Description**: Intelligent chat interface powered by LLM (Alibaba Cloud Qwen / OpenAI). Supports session memory.
 - **Request Body**:
   ```json
   {
+    "session_id": 1, // Optional: Provide to continue an existing conversation
     "message": "Find me a Band 1 school in Shatin for my son."
   }
   ```
 - **Response**:
   ```json
   {
+    "session_id": 1, // Returned to track the session
     "message": "I found 3 schools matching your criteria...",
     "reasoning": "The user is looking for Band 1 schools in Shatin. I will search the database with filters: District=Sha Tin, Banding=Band 1.",
     "schools": [
@@ -255,6 +264,7 @@ The API supports multi-language responses for error messages and analysis text.
   ```
 - **Logic**:
   - The AI automatically detects user intent ("search" vs "chat").
+  - **Memory**: If `session_id` is provided, the last 10 messages of history are used as context.
   - **Reasoning**: If the model supports thinking mode (e.g., DeepSeek), this field contains the chain-of-thought.
   - If searching, it extracts filters (District, Gender, Banding, Keywords) and queries the database.
   - Supports multi-language responses based on `Accept-Language` header.

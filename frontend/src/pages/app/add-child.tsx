@@ -29,7 +29,7 @@ export default function AddChildPage() {
   const [successMsg, setSuccessMsg] = useState("");
 
   // Fetch child data if in edit mode
-  const { data: childData } = useQuery({
+  const { data: childData, isLoading: isLoadingChild } = useQuery({
     queryKey: ["child", id],
     queryFn: async () => {
       if (!id) return null;
@@ -54,6 +54,14 @@ export default function AddChildPage() {
       });
     }
   }, [childData]);
+
+  if (isEditMode && isLoadingChild) {
+      return (
+          <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+              <div className="text-gray-500">{t('common.loading') || 'Loading...'}</div>
+          </div>
+      );
+  }
 
   const createMutation = useMutation({
     mutationFn: childrenApi.create,

@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { User, Settings, LogOut, Plus } from "lucide-react";
+import { User, Settings, LogOut, Plus, Trash2 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { childrenApi } from "@/api/children";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,7 @@ import { useMetadata } from "@/hooks/use-metadata";
 export default function ProfilePage() {
   const { user, logout, setCurrentChildId } = useAuthStore();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
   const { getGenderLabel } = useMetadata();
 
@@ -65,16 +66,33 @@ export default function ProfilePage() {
                     {t('profile.grade')}: {child.current_grade} {child.target_grade ? `-> ${child.target_grade}` : ""} | {t('profile.target')}: {child.target_districts}
                   </p>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/app/profile/edit-child/${child.id}`);
-                  }}
-                >
-                  {t('profile.edit')}
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/app/profile/edit-child/${child.id}`);
+                    }}
+                  >
+                    {t('profile.edit')}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (window.confirm(t('child.delete_confirm') || 'Are you sure?')) {
+                        childrenApi.delete(child.id).then(() => {
+                          queryClient.invalidateQueries({ queryKey: ["children"] });
+                        });
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))
