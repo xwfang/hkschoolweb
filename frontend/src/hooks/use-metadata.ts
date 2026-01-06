@@ -19,7 +19,11 @@ export function useMetadata() {
   const { data, isLoading } = useQuery({
     queryKey: ["metadata"],
     queryFn: metadataApi.get,
-    staleTime: 1000 * 60 * 60, // 1 hour
+    staleTime: Infinity, // Never stale (static data)
+    gcTime: Infinity, // Keep in cache as long as the session is active
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   const getLabel = (items: MetadataItem[] | undefined, key: string) => {
