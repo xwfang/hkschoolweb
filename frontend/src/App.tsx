@@ -1,16 +1,19 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Suspense, lazy } from "react";
 import './styles/App.css'
 import AppLayout from "./layouts/app-layout";
 import AuthLayout from "./layouts/auth-layout";
-import LoginPage from "./pages/auth/login";
-import HomePage from "./pages/app/home";
-import TrackingPage from "./pages/app/tracking";
-import ProfilePage from "./pages/app/profile";
-import AddChildPage from "@/pages/app/add-child";
-import SchoolDetailPage from "@/pages/app/school-detail";
-import ChatPage from "@/pages/app/chat";
-import SettingsPage from "@/pages/app/settings";
+
+// Lazy load pages for performance
+const LoginPage = lazy(() => import("./pages/auth/login"));
+const HomePage = lazy(() => import("./pages/app/home"));
+const TrackingPage = lazy(() => import("./pages/app/tracking"));
+const ProfilePage = lazy(() => import("./pages/app/profile"));
+const AddChildPage = lazy(() => import("@/pages/app/add-child"));
+const SchoolDetailPage = lazy(() => import("@/pages/app/school-detail"));
+const ChatPage = lazy(() => import("@/pages/app/chat"));
+const SettingsPage = lazy(() => import("@/pages/app/settings"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,35 +23,44 @@ const queryClient = new QueryClient({
   },
 });
 
+// Loading fallback component
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="text-gray-500 text-sm">Loading...</div>
+  </div>
+);
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Routes>
-          {/* Default Redirect */}
-          <Route path="/" element={<Navigate to="/app" replace />} />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* Default Redirect */}
+            <Route path="/" element={<Navigate to="/app" replace />} />
 
-          {/* Auth Routes */}
-          <Route element={<AuthLayout />}>
-            <Route path="/login" element={<LoginPage />} />
-          </Route>
+            {/* Auth Routes */}
+            <Route element={<AuthLayout />}>
+              <Route path="/login" element={<LoginPage />} />
+            </Route>
 
-          {/* Parent App Routes (Protected) */}
-          <Route path="/app" element={<AppLayout />}>
-            <Route index element={<HomePage />} />
-            <Route path="tracking" element={<TrackingPage />} />
-            <Route path="chat" element={<ChatPage />} />
-            <Route path="profile" element={<ProfilePage />} />
-          </Route>
+            {/* Parent App Routes (Protected) */}
+            <Route path="/app" element={<AppLayout />}>
+              <Route index element={<HomePage />} />
+              <Route path="tracking" element={<TrackingPage />} />
+              <Route path="chat" element={<ChatPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+            </Route>
 
-          <Route path="/app/profile/add-child" element={<AddChildPage />} />
-          <Route path="/app/profile/edit-child/:id" element={<AddChildPage />} />
-          <Route path="/app/profile/settings" element={<SettingsPage />} />
-          <Route path="/app/school/:id" element={<SchoolDetailPage />} />
+            <Route path="/app/profile/add-child" element={<AddChildPage />} />
+            <Route path="/app/profile/edit-child/:id" element={<AddChildPage />} />
+            <Route path="/app/profile/settings" element={<SettingsPage />} />
+            <Route path="/app/school/:id" element={<SchoolDetailPage />} />
 
-          {/* Admin Routes (Placeholder) */}
-          <Route path="/admin" element={<div>Admin Panel (Coming Soon)</div>} />
-        </Routes>
+            {/* Admin Routes (Placeholder) */}
+            <Route path="/admin" element={<div>Admin Panel (Coming Soon)</div>} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </QueryClientProvider>
   );
