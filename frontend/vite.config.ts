@@ -19,7 +19,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://localhost:8080", // Go backend address
+        target: "http://47.86.99.208:8080", // Remote backend address
         changeOrigin: true,
       },
     },
