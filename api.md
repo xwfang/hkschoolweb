@@ -25,6 +25,10 @@ LLM-powered endpoints have a daily usage limit per user.
 ## 1. Authentication (Auth)
 *Public Access*
 
+**User Roles**:
+- `parent`: Default role. Access to child profiles, applications, and school search.
+- `admin`: Elevated privileges. Access to school management (Create/Edit/Delete) and system operations (Crawler).
+
 **Note on Phone Numbers**: The system automatically normalizes phone numbers. You can input numbers without country codes (e.g., `91234567` or `13800000000`), and they will be automatically formatted to `+852` (HK) or `+86` (China) prefixes.
 
 ### 1.1 Send OTP (Login Request)
@@ -168,7 +172,11 @@ LLM-powered endpoints have a daily usage limit per user.
   - `gender`: "boys", "girls", "co_ed" (Use metadata keys)
   - `religion`: e.g., "Christianity"
   - `sort`: "popularity" (Sort by popularity score descending)
-  - `name`: Search by name (English or Chinese)
+  - `name`: Search by name. Supports:
+    - **Fuzzy Search**: Matches partial names.
+    - **Multilingual**: Searches across both English (`name_en`) and Chinese (`name_cn`) fields.
+    - **Simplified Chinese Support**: Automatically converts Simplified Chinese input to Traditional Chinese for matching (e.g., "颜宝" matches "顏寶").
+    - **Auto-trim**: Automatically removes leading/trailing whitespace.
 - **Example**: `GET /schools?district=kowloon_city&sort=popularity`
 - **Response**: Array of School objects.
 
@@ -179,8 +187,9 @@ LLM-powered endpoints have a daily usage limit per user.
     - `popularity`: Integer score representing school hotness.
     - `tags`: Comma-separated strings (e.g. "Academic, Elite, Music") for AI/Search features.
 
-### 3.3 Create School (Admin)
+### 3.3 Create School (Admin Only)
 - **Endpoint**: `POST /schools`
+- **Requires**: Admin Role
 - **Request Body**:
   ```json
   {
@@ -196,6 +205,15 @@ LLM-powered endpoints have a daily usage limit per user.
     "tags": "New, Featured"
   }
   ```
+
+### 3.4 Update School (Admin Only)
+- **Endpoint**: `PUT /schools/:id`
+- **Requires**: Admin Role
+- **Request Body**: Partial update of school fields.
+
+### 3.5 Delete School (Admin Only)
+- **Endpoint**: `DELETE /schools/:id`
+- **Requires**: Admin Role
 
 ---
 
@@ -278,8 +296,9 @@ LLM-powered endpoints have a daily usage limit per user.
   }
   ```
 
-### 5.3 Trigger Crawler (Admin)
+### 5.3 Trigger Crawler (Admin Only)
 - **Endpoint**: `POST /crawl`
+- **Requires**: Admin Role
 - **Query Parameters**: 
   - `action`: `discover` (Crawls lists of Kindergartens, Primary, and Secondary schools from schooland.hk)
   - `school_id`: (Optional, crawls admission details for specific school)

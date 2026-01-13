@@ -15,6 +15,10 @@ const SchoolDetailPage = lazy(() => import("@/pages/app/school-detail"));
 const ChatPage = lazy(() => import("@/pages/app/chat"));
 const SettingsPage = lazy(() => import("@/pages/app/settings"));
 
+// Admin Pages
+const AdminLayout = lazy(() => import("./layouts/admin-layout"));
+const AdminSchoolsPage = lazy(() => import("./pages/admin/schools"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -57,8 +61,12 @@ function App() {
             <Route path="/app/profile/settings" element={<SettingsPage />} />
             <Route path="/app/school/:id" element={<SchoolDetailPage />} />
 
-            {/* Admin Routes (Placeholder) */}
-            <Route path="/admin" element={<div>Admin Panel (Coming Soon)</div>} />
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Navigate to="schools" replace />} />
+              <Route path="schools" element={<AdminSchoolsPage />} />
+              <Route path="settings" element={<div>Settings (Coming Soon)</div>} />
+            </Route>
           </Routes>
         </Suspense>
       </BrowserRouter>

@@ -31,3 +31,8 @@ temp_data/
 !frontend/tsconfig.app.json
 !frontend/tsconfig.node.json
 !frontend/src/i18n/locales/**/*.json
+
+# Deployment artifacts
+deploy-package/
+
+
