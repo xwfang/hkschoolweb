@@ -302,7 +302,14 @@ LLM-powered endpoints have a daily usage limit per user.
 - **Query Parameters**: 
   - `action`: `discover` (Crawls lists of Kindergartens, Primary, and Secondary schools from schooland.hk)
   - `school_id`: (Optional, crawls admission details for specific school)
+  - `district`: (Optional, e.g., `kowloon_city`. Crawls admission details for all schools in the specified district)
+  - `banding`: (Optional, e.g., `Band 1`. Filters schools by banding when crawling a district)
 - **Response**: Crawl status report.
+- **Example**: 
+  ```bash
+  # Crawl all Band 1 schools in Kowloon City
+  POST /crawl?district=kowloon_city&banding=Band%201
+  ```
 
 ---
 

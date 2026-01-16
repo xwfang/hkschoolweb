@@ -57,5 +57,16 @@ export const adminApi = {
       }
     });
     return response.data;
+  },
+
+  // Trigger batch crawler for a district and banding
+  crawlBatch: async (district: string, banding: string) => {
+    const response = await api.post<CrawlResult>("/crawl", null, {
+      params: { 
+        district,
+        banding
+      }
+    });
+    return response.data;
   }
 };

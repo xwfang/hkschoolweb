@@ -17,6 +17,7 @@ const SettingsPage = lazy(() => import("@/pages/app/settings"));
 
 // Admin Pages
 const AdminLayout = lazy(() => import("./layouts/admin-layout"));
+const AdminDashboardPage = lazy(() => import("./pages/admin/dashboard"));
 const AdminSchoolsPage = lazy(() => import("./pages/admin/schools"));
 
 const queryClient = new QueryClient({
@@ -63,7 +64,7 @@ function App() {
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<Navigate to="schools" replace />} />
+              <Route index element={<AdminDashboardPage />} />
               <Route path="schools" element={<AdminSchoolsPage />} />
               <Route path="settings" element={<div>Settings (Coming Soon)</div>} />
             </Route>

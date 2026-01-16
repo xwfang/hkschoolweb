@@ -2,11 +2,18 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { adminApi } from "@/api/admin";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ExternalLink, RefreshCw, Edit, AlertCircle, Trash2, Globe } from "lucide-react";
+import { ExternalLink, RefreshCw, Edit, AlertCircle, Trash2, Globe, Bot } from "lucide-react";
 import { useState } from "react";
+import { useMetadata } from "@/hooks/use-metadata";
 
 export default function AdminSchoolsPage() {
   const [crawlingId, setCrawlingId] = useState<number | null>(null);
+  
+  // New states for batch crawl
+  const [selectedDistrict, setSelectedDistrict] = useState<string>("");
+  const [selectedBanding, setSelectedBanding] = useState<string>("");
+
+  const { districts, getDistrictLabel } = useMetadata();
 
   // Fetch schools
   const { data: schools, isLoading, refetch } = useQuery({
@@ -37,6 +44,19 @@ export default function AdminSchoolsPage() {
     },
     onError: (err) => {
       alert("Discovery Failed: " + err);
+    }
+  });
+
+  // Batch Crawl mutation
+  const batchCrawlMutation = useMutation({
+    mutationFn: ({ district, banding }: { district: string; banding: string }) => 
+      adminApi.crawlBatch(district, banding),
+    onSuccess: (data) => {
+      alert(`Batch Crawl Started!\n${data.message}`);
+      refetch();
+    },
+    onError: (err) => {
+      alert("Batch Crawl Failed: " + err);
     }
   });
 
@@ -78,6 +98,54 @@ export default function AdminSchoolsPage() {
           </Button>
         </div>
       </div>
+
+      {/* New Crawler Control Panel */}
+      <Card className="p-6 bg-white shadow-sm border border-slate-200">
+        <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <Bot className="w-5 h-5 text-indigo-600" />
+            Batch Crawler
+        </h3>
+        <div className="flex flex-wrap gap-4 items-end">
+            <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 block">District</label>
+                <select 
+                    className="flex h-10 w-[200px] items-center justify-between rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={selectedDistrict}
+                    onChange={(e) => setSelectedDistrict(e.target.value)}
+                >
+                    <option value="">Select District</option>
+                    {districts.map(d => (
+                        <option key={d.key} value={d.key}>{getDistrictLabel(d.key)}</option>
+                    ))}
+                </select>
+            </div>
+
+            <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 block">Banding</label>
+                <select 
+                    className="flex h-10 w-[200px] items-center justify-between rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={selectedBanding}
+                    onChange={(e) => setSelectedBanding(e.target.value)}
+                >
+                    <option value="">Select Banding</option>
+                    <option value="Band 1">Band 1</option>
+                    <option value="Band 2">Band 2</option>
+                    <option value="Band 3">Band 3</option>
+                </select>
+            </div>
+
+            <Button 
+                onClick={() => batchCrawlMutation.mutate({ district: selectedDistrict, banding: selectedBanding })}
+                disabled={!selectedDistrict || batchCrawlMutation.isPending}
+                className="bg-indigo-600 hover:bg-indigo-700"
+            >
+                {batchCrawlMutation.isPending ? "Crawling..." : "Start Batch Crawl"}
+            </Button>
+        </div>
+        <p className="text-sm text-slate-500 mt-2">
+            * This will trigger a background job to crawl admission details for all schools in the selected district.
+        </p>
+      </Card>
 
       <Card className="overflow-hidden bg-white shadow-sm border border-slate-200">
         <div className="overflow-x-auto">
