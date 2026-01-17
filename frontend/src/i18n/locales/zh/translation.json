@@ -44,6 +44,7 @@
   "profile": {
     "title": "个人中心",
     "children": "我的子女",
+    "all_children": "所有子女",
     "add_child": "添加子女",
     "logout": "退出登录",
     "settings": "设置",

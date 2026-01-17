@@ -44,6 +44,7 @@
   "profile": {
     "title": "Profile",
     "children": "My Children",
+    "all_children": "All Children",
     "add_child": "Add Child",
     "logout": "Logout",
     "settings": "Settings",

@@ -77,7 +77,13 @@ export default function HomePage() {
     // Gender
     if (currentLevel === "Secondary" || currentLevel === "Primary") {
        genders.forEach(g => {
-          filters.push({ label: getGenderLabel(g.key), icon: User, value: g.key, type: "gender" });
+          // Map metadata key to backend expected value (Title Case)
+          let backendValue = g.key;
+          if (g.key === 'boys') backendValue = 'Boys';
+          if (g.key === 'girls') backendValue = 'Girls';
+          if (g.key === 'co_ed') backendValue = 'Co-ed';
+
+          filters.push({ label: getGenderLabel(g.key), icon: User, value: backendValue, type: "gender" });
        });
     }
 

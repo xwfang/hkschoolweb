@@ -82,7 +82,7 @@ export default function SchoolDetailPage() {
   );
 
   return (
-    <div className="min-h-screen bg-white pb-20">
+    <div className="min-h-screen bg-white pb-32">
        {/* Header */}
       <div className="bg-white px-3 h-14 flex items-center gap-3 sticky top-0 z-10 border-b">
         <Button variant="ghost" size="sm" className="p-0 h-8 w-8" onClick={handleBack}>

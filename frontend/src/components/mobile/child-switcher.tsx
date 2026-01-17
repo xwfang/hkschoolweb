@@ -5,8 +5,10 @@ import { ChevronDown, Plus, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 export function ChildSwitcher() {
+  const { t } = useTranslation();
   const { currentChildId, setCurrentChildId } = useAuthStore();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -30,7 +32,7 @@ export function ChildSwitcher() {
         <div>
           <div className="flex items-center gap-1">
             <h2 className="text-base font-bold text-gray-900 leading-none">
-              {currentChild ? currentChild.name : "所有子女"}
+              {currentChild ? currentChild.name : t("profile.all_children")}
             </h2>
             <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
           </div>
@@ -48,7 +50,7 @@ export function ChildSwitcher() {
                   setIsOpen(false);
                 }}
               >
-              <span>所有子女</span>
+              <span>{t("profile.all_children")}</span>
               {!currentChildId && <div className="h-1.5 w-1.5 rounded-full bg-indigo-600" />}
             </div>
             {children?.map(child => (
@@ -75,7 +77,7 @@ export function ChildSwitcher() {
                 }}
               >
                 <Plus className="h-3 w-3 mr-2" />
-                添加子女档案
+                {t("child.add_title")}
               </Button>
             </div>
           </div>

@@ -61,10 +61,13 @@ export function useMetadata() {
       "arts": { en: "Arts", tc: "藝術特長", sc: "艺术特长" },
       "stem": { en: "STEM", tc: "STEM強項", sc: "STEM强项" },
       "band 1": { en: "Band 1", tc: "Band 1", sc: "Band 1" },
+      "lang:英中": { en: "Lang: EMI", tc: "授課: 英中", sc: "授课: 英中" },
+      "lang:中中": { en: "Lang: CMI", tc: "授課: 中中", sc: "授课: 中中" },
+      "history": { en: "History", tc: "歷史悠久", sc: "历史悠久" },
     }
   };
 
-  const getLabel = (items: MetadataItem[] | undefined, key: string, category?: 'genders' | 'religions' | 'tags') => {
+  const getLabel = (items: MetadataItem[] | undefined, key: string, category?: 'genders' | 'religions' | 'tags' | 'categories') => {
     if (!key) return "";
     
     // 1. Try to find in API data (exact match)
@@ -98,7 +101,7 @@ export function useMetadata() {
     isLoading,
     getDistrictLabel: (key: string) => getLabel(data?.districts, key),
     getGenderLabel: (key: string) => getLabel(data?.genders, key, 'genders'),
-    getCategoryLabel: (key: string) => getLabel(data?.categories, key),
+    getCategoryLabel: (key: string) => getLabel(data?.categories, key, 'categories'),
     getReligionLabel: (key: string) => getLabel(data?.religions, key, 'religions'),
     getTagLabel: (key: string) => getLabel(undefined, key, 'tags'),
   };
