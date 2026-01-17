@@ -11,6 +11,7 @@ export interface MetadataResponse {
   districts: MetadataItem[];
   genders: MetadataItem[];
   categories: MetadataItem[];
+  religions: MetadataItem[];
 }
 
 export const metadataApi = {

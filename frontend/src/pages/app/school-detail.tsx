@@ -10,7 +10,7 @@ import { useMetadata } from "@/hooks/use-metadata";
 
 export default function SchoolDetailPage() {
   const { t, i18n } = useTranslation();
-  const { getDistrictLabel, getGenderLabel, getCategoryLabel } = useMetadata();
+  const { getDistrictLabel, getGenderLabel, getCategoryLabel, getReligionLabel, getTagLabel } = useMetadata();
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentChildId } = useAuthStore();
@@ -102,7 +102,7 @@ export default function SchoolDetailPage() {
            <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{getDistrictLabel(school.district)}</span>
            <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{getGenderLabel(school.gender)}</span>
            <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{getCategoryLabel(school.category)}</span>
-           {school.religion && <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{school.religion}</span>}
+           {school.religion && <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{getReligionLabel(school.religion)}</span>}
            {school.school_net && <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{t('school.net')}: {school.school_net}</span>}
         </div>
 
@@ -120,7 +120,7 @@ export default function SchoolDetailPage() {
               {school.tags.split(',').map(tag => (
                 <span key={tag} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
                   <Tag className="w-3 h-3 mr-1" />
-                  {tag.trim()}
+                  {getTagLabel(tag.trim())}
                 </span>
               ))}
             </div>
@@ -133,11 +133,11 @@ export default function SchoolDetailPage() {
           <div className="grid grid-cols-2 gap-4 text-sm">
              <div>
                <p className="text-gray-500">{t('school.type')}</p>
-               <p>{school.category}</p>
+               <p>{getCategoryLabel(school.category)}</p>
              </div>
              <div>
                <p className="text-gray-500">{t('school.district')}</p>
-               <p>{school.district}</p>
+               <p>{getDistrictLabel(school.district)}</p>
              </div>
              <div>
                <p className="text-gray-500">{t('school.moi')}</p>
@@ -145,7 +145,7 @@ export default function SchoolDetailPage() {
              </div>
              <div>
                <p className="text-gray-500">{t('school.religion')}</p>
-               <p>{school.religion || t('school.none')}</p>
+               <p>{school.religion ? getReligionLabel(school.religion) : t('school.none')}</p>
              </div>
           </div>
 

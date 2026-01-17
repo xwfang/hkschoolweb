@@ -17,7 +17,7 @@ import { User } from "lucide-react";
 
 export default function HomePage() {
   const { t, i18n } = useTranslation();
-  const { getDistrictLabel, getGenderLabel, getCategoryLabel, districts, categories, genders } = useMetadata();
+  const { getDistrictLabel, getGenderLabel, getCategoryLabel, getTagLabel, districts, categories, genders } = useMetadata();
   const { currentChildId } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
   // activeFilter now stores the 'key' from metadata
@@ -287,7 +287,7 @@ export default function HomePage() {
                           {school.tags && school.tags.split(',').slice(0, 2).map((tag, idx) => (
                             <div key={`${school.id}-tag-${idx}`} className="flex items-center gap-1 text-xs text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
                                <Tag className="h-3 w-3" />
-                               {tag.trim()}
+                               {getTagLabel(tag.trim())}
                             </div>
                           ))}
                         </div>
