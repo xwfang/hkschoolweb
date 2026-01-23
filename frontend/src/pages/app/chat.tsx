@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { Send, Bot, User, Sparkles } from "lucide-react";
+import { Send, Bot, User, Sparkles, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { aiApi } from "@/api/ai";
 import { cn } from "@/lib/utils";
@@ -16,10 +17,12 @@ interface Message {
   reasoning?: string;
   contentKey?: string;
   schools?: School[]; // To store schools if provided in response
+  isLimitError?: boolean;
 }
 
 export default function ChatPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -56,8 +59,11 @@ export default function ChatPage() {
     },
     onError: (error: AxiosError) => {
       let errorMessage = t('chat.error');
+      let isLimit = false;
+
       if (error?.response?.status === 429) {
-        errorMessage = t('chat.rate_limit_error') || "Daily usage limit exceeded. Please try again tomorrow.";
+        errorMessage = t('subscription.limit_reached_desc');
+        isLimit = true;
       }
       
       setMessages((prev) => [
@@ -65,7 +71,8 @@ export default function ChatPage() {
         {
           id: new Date().getTime().toString(),
           role: "assistant",
-          content: errorMessage
+          content: errorMessage,
+          isLimitError: isLimit
         }
       ]);
     }
@@ -143,6 +150,25 @@ export default function ChatPage() {
               )}
               {msg.content || (msg.contentKey ? t(msg.contentKey) : "")}
               
+              {msg.isLimitError && (
+                <div className="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                  <div className="flex items-center gap-2 text-orange-800 font-medium mb-2">
+                    <Lock className="w-4 h-4" />
+                    {t('subscription.limit_reached_title')}
+                  </div>
+                  <p className="text-sm text-orange-700 mb-3">
+                    {t('subscription.limit_reached_desc')}
+                  </p>
+                  <Button 
+                    size="sm" 
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                    onClick={() => navigate('/app/subscription')}
+                  >
+                    {t('subscription.upgrade_now')}
+                  </Button>
+                </div>
+              )}
+
               {msg.schools && msg.schools.length > 0 && (
                 <div className="mt-3 space-y-2">
                   <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Found Schools</div>

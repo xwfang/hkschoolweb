@@ -48,6 +48,10 @@
     "add_child": "添加子女",
     "logout": "退出登录",
     "settings": "设置",
+    "vip_status": "VIP 会员",
+    "vip_expire": "到期时间: {{date}}",
+    "free_user": "普通用户",
+    "upgrade_vip": "开通 VIP",
     "select_child_hint": "请选择一个子女以查看详情",
     "user_title": "家长用户",
     "grade": "年级",
@@ -155,5 +159,25 @@
     "error": "抱歉，我遇到了一些问题，请稍后再试。",
     "rate_limit_error": "已达到今日使用限额，请明天再试。",
     "thinking": "正在思考..."
+  },
+  "subscription": {
+    "title": "升级 VIP 会员",
+    "desc": "解锁无限次 AI 对话和高级分析功能。",
+    "select_plan": "选择方案",
+    "payment_method": "支付方式",
+    "wechat_pay": "微信支付",
+    "alipay": "支付宝",
+    "transaction_id": "交易单号 / 备注",
+    "transaction_id_placeholder": "请输入您的支付交易单号",
+    "submit": "提交订单",
+    "submitting": "提交中...",
+    "success": "订单提交成功！",
+    "success_desc": "请等待管理员审核。在此期间您可以继续使用免费功能。",
+    "error": "提交订单失败。",
+    "scan_qr": "扫码支付",
+    "qr_desc": "请扫描下方二维码支付，然后输入交易单号。",
+    "limit_reached_title": "今日次数已用完",
+    "limit_reached_desc": "您已达到今日 AI 功能使用上限。升级 VIP 可享受无限次使用。",
+    "upgrade_now": "立即升级"
   }
 }

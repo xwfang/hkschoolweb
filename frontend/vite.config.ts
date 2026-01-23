@@ -20,7 +20,7 @@ export default defineConfig({
     proxy: {
       "/api": {
         // target: "http://47.86.99.208:8080", // Remote backend address
-        target: "http://localhost:8080", // Local backend address
+        target: "http://150.109.69.62:8080", // New Remote backend address
         changeOrigin: true,
       },
     },

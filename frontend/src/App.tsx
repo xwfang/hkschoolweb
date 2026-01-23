@@ -14,6 +14,7 @@ const AddChildPage = lazy(() => import("@/pages/app/add-child"));
 const SchoolDetailPage = lazy(() => import("@/pages/app/school-detail"));
 const ChatPage = lazy(() => import("@/pages/app/chat"));
 const SettingsPage = lazy(() => import("@/pages/app/settings"));
+const SubscriptionPage = lazy(() => import("@/pages/app/subscription"));
 
 // Admin Pages
 const AdminLayout = lazy(() => import("./layouts/admin-layout"));
@@ -60,6 +61,7 @@ function App() {
             <Route path="/app/profile/add-child" element={<AddChildPage />} />
             <Route path="/app/profile/edit-child/:id" element={<AddChildPage />} />
             <Route path="/app/profile/settings" element={<SettingsPage />} />
+            <Route path="/app/subscription" element={<SubscriptionPage />} />
             <Route path="/app/school/:id" element={<SchoolDetailPage />} />
 
             {/* Admin Routes */}

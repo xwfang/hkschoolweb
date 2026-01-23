@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { User, Settings, LogOut, Plus, Trash2 } from "lucide-react";
+import { User, Settings, LogOut, Plus, Trash2, Crown } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { childrenApi } from "@/api/children";
@@ -25,15 +25,42 @@ export default function ProfilePage() {
     navigate("/login");
   };
 
+  const isVip = user?.vip_expire_at && new Date(user.vip_expire_at) > new Date();
+
   return (
     <div className="p-4 space-y-6">
-      <div className="flex items-center gap-4 p-4 bg-white rounded-lg shadow-sm border">
-        <div className="h-16 w-16 bg-gray-200 rounded-full flex items-center justify-center">
-          <User className="h-8 w-8 text-gray-500" />
+      <div className="flex items-center gap-4 p-4 bg-white rounded-lg shadow-sm border relative overflow-hidden">
+        {isVip ? (
+          <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-xs px-2 py-1 rounded-bl-lg font-bold flex items-center gap-1">
+            <Crown className="w-3 h-3" /> VIP
+          </div>
+        ) : (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="absolute top-3 right-3 h-7 text-xs border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-800"
+            onClick={() => navigate("/app/subscription")}
+          >
+            <Crown className="w-3 h-3 mr-1" />
+            {t('profile.upgrade_vip')}
+          </Button>
+        )}
+        <div className={`h-16 w-16 rounded-full flex items-center justify-center ${isVip ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-200 text-gray-500'}`}>
+          <User className="h-8 w-8" />
         </div>
-        <div>
-          <h2 className="text-lg font-bold">{t('profile.user_title')}</h2>
+        <div className="flex-1">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            {t('profile.user_title')}
+          </h2>
           <p className="text-sm text-gray-500">{user?.identifier}</p>
+          
+          <div className="mt-2 flex items-center gap-2">
+             {isVip && (
+               <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-medium">
+                 {t('profile.vip_expire', { date: user?.vip_expire_at ? new Date(user.vip_expire_at).toLocaleDateString() : '' })}
+               </span>
+             )}
+          </div>
         </div>
       </div>
 

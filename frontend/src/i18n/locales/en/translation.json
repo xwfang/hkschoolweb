@@ -48,6 +48,10 @@
     "add_child": "Add Child",
     "logout": "Logout",
     "settings": "Settings",
+    "vip_status": "VIP Status",
+    "vip_expire": "Expires: {{date}}",
+    "free_user": "Free User",
+    "upgrade_vip": "Upgrade to VIP",
     "select_child_hint": "Select a child to view details",
     "user_title": "Parent User",
     "grade": "Grade",
@@ -155,5 +159,25 @@
     "error": "Sorry, I encountered an issue. Please try again later.",
     "rate_limit_error": "Daily usage limit exceeded. Please try again tomorrow.",
     "thinking": "Thinking..."
+  },
+  "subscription": {
+    "title": "Upgrade to VIP",
+    "desc": "Unlock unlimited AI chat and advanced analysis.",
+    "select_plan": "Select a Plan",
+    "payment_method": "Payment Method",
+    "wechat_pay": "WeChat Pay",
+    "alipay": "Alipay",
+    "transaction_id": "Transaction ID / Remark",
+    "transaction_id_placeholder": "Enter your payment transaction ID",
+    "submit": "Submit Order",
+    "submitting": "Submitting...",
+    "success": "Order submitted successfully!",
+    "success_desc": "Please wait for admin approval. You can continue using free features in the meantime.",
+    "error": "Failed to submit order.",
+    "scan_qr": "Scan QR Code to Pay",
+    "qr_desc": "Please scan the QR code below to pay, then enter the transaction ID.",
+    "limit_reached_title": "Daily Limit Reached",
+    "limit_reached_desc": "You have reached your daily limit for AI features. Upgrade to VIP for unlimited access.",
+    "upgrade_now": "Upgrade Now"
   }
 }

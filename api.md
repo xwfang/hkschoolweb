@@ -40,6 +40,140 @@ LLM-powered endpoints have a daily usage limit per user.
     "identifier": "parent@example.com" // or phone number
   }
   ```
+
+---
+
+## 7. Membership (VIP)
+*Requires Auth Header*
+
+### 7.1 List Membership Plans
+- **Endpoint**: `GET /plans`
+- **Description**: Returns a list of available VIP subscription plans.
+- **Response**:
+  ```json
+  [
+    {
+      "id": 1,
+      "name": "Monthly VIP",
+      "price": 30,
+      "duration_days": 30,
+      "description": "Unlock all premium features for 30 days"
+    },
+    {
+      "id": 2,
+      "name": "Annual VIP",
+      "price": 300,
+      "duration_days": 365,
+      "description": "Best value, valid for 365 days"
+    }
+  ]
+  ```
+
+### 7.2 Create Order (Subscribe)
+- **Endpoint**: `POST /orders`
+- **Description**: Creates a new subscription order. The user pays offline (e.g., via WeChat/Alipay personal code) and submits the payment details here.
+- **Request Body**:
+  ```json
+  {
+    "plan_id": 1,
+    "payment_remark": "WeChat Pay: Transaction ID 2024..."
+  }
+  ```
+- **Response**: `201 Created`
+  ```json
+  {
+    "message": "Order submitted. Please wait for admin approval.",
+    "order_id": 1,
+    "status": "pending_review"
+  }
+  ```
+
+### 7.3 List Orders (Admin Only)
+- **Endpoint**: `GET /orders`
+- **Requires**: Admin Role
+- **Description**: Lists all subscription orders, sorted by newest first.
+- **Response**: Array of Order objects with user and plan details.
+
+### 7.4 Review Order (Admin Only)
+- **Endpoint**: `POST /orders/:id/review`
+- **Requires**: Admin Role
+- **Description**: Approve or reject a pending order.
+- **Request Body**:
+  ```json
+  {
+    "action": "confirm" // "confirm" or "reject"
+  }
+  ```
+- **Response**:
+  - If confirmed: Updates order status to `confirmed` and extends user's `vip_expire_at`.
+  - If rejected: Updates order status to `rejected`.
+
+---
+
+## 7. Membership (VIP)
+*Requires Auth Header*
+
+### 7.1 List Membership Plans
+- **Endpoint**: `GET /plans`
+- **Description**: Returns a list of available VIP subscription plans.
+- **Response**:
+  ```json
+  [
+    {
+      "id": 1,
+      "name": "Monthly VIP",
+      "price": 30,
+      "duration_days": 30,
+      "description": "Unlock all premium features for 30 days"
+    },
+    {
+      "id": 2,
+      "name": "Annual VIP",
+      "price": 300,
+      "duration_days": 365,
+      "description": "Best value, valid for 365 days"
+    }
+  ]
+  ```
+
+### 7.2 Create Order (Subscribe)
+- **Endpoint**: `POST /orders`
+- **Description**: Creates a new subscription order. The user pays offline (e.g., via WeChat/Alipay personal code) and submits the payment details here.
+- **Request Body**:
+  ```json
+  {
+    "plan_id": 1,
+    "payment_remark": "WeChat Pay: Transaction ID 2024..."
+  }
+  ```
+- **Response**: `201 Created`
+  ```json
+  {
+    "message": "Order submitted. Please wait for admin approval.",
+    "order_id": 1,
+    "status": "pending_review"
+  }
+  ```
+
+### 7.3 List Orders (Admin Only)
+- **Endpoint**: `GET /orders`
+- **Requires**: Admin Role
+- **Description**: Lists all subscription orders, sorted by newest first.
+- **Response**: Array of Order objects with user and plan details.
+
+### 7.4 Review Order (Admin Only)
+- **Endpoint**: `POST /orders/:id/review`
+- **Requires**: Admin Role
+- **Description**: Approve or reject a pending order.
+- **Request Body**:
+  ```json
+  {
+    "action": "confirm" // "confirm" or "reject"
+  }
+  ```
+- **Response**:
+  - If confirmed: Updates order status to `confirmed` and extends user's `vip_expire_at`.
+  - If rejected: Updates order status to `rejected`.
 - **Response**:
   ```json
   {
@@ -304,11 +438,15 @@ LLM-powered endpoints have a daily usage limit per user.
   - `school_id`: (Optional, crawls admission details for specific school)
   - `district`: (Optional, e.g., `kowloon_city`. Crawls admission details for all schools in the specified district)
   - `banding`: (Optional, e.g., `Band 1`. Filters schools by banding when crawling a district)
+  - `top`: (Optional, e.g., `100`. Crawls the top N most popular schools)
 - **Response**: Crawl status report.
 - **Example**: 
   ```bash
   # Crawl all Band 1 schools in Kowloon City
   POST /crawl?district=kowloon_city&banding=Band%201
+
+  # Crawl Top 100 popular schools
+  POST /crawl?top=100
   ```
 
 ---

@@ -5,6 +5,7 @@ interface User {
   id: number;
   identifier: string;
   role: 'parent' | 'admin';
+  vip_expire_at?: string; // ISO Date string
 }
 
 interface AuthState {
