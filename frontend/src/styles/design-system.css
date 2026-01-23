@@ -1,0 +1,271 @@
+:root {
+  /* 
+   * ==========================================
+   * 1. 间距体系 (Spacing System) - 8px Grid
+   * ==========================================
+   */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-8: 64px;
+  --space-10: 80px;
+  
+  /* 
+   * ==========================================
+   * 2. 配色体系 (Color System)
+   * ==========================================
+   */
+  
+  /* 主色 (Primary) - Indigo: 信任、专业、现代 */
+  --color-primary-light: #e0e7ff; /* Indigo 100 */
+  --color-primary-main: #4f46e5;  /* Indigo 600 */
+  --color-primary-dark: #312e81;  /* Indigo 900 */
+
+  /* 辅色 (Secondary) - Teal: 活力、成长、安全 */
+  --color-secondary-light: #ccfbf1; /* Teal 100 */
+  --color-secondary-main: #0d9488;  /* Teal 600 */
+  --color-secondary-dark: #115e59;  /* Teal 800 */
+
+  /* 中性色 (Neutral) - Slate: 干净、阅读舒适 */
+  --color-neutral-light: #f1f5f9;   /* Slate 100 - 背景/边框 */
+  --color-neutral-main: #64748b;    /* Slate 500 - 次要文本 */
+  --color-neutral-dark: #0f172a;    /* Slate 900 - 标题/主要文本 */
+
+  /* 语义化映射 */
+  --color-bg-default: #ffffff;
+  --color-bg-subtle: var(--color-neutral-light);
+  --color-text-primary: var(--color-neutral-dark);
+  --color-text-secondary: var(--color-neutral-main);
+  --color-border: #e2e8f0;
+
+  /* 
+   * ==========================================
+   * 3. 字体体系 (Typography System)
+   * ==========================================
+   */
+  --font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* 字号 */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+
+  /* 行高 */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* 
+   * ==========================================
+   * 4. 通用样式 (Common Styles)
+   * ==========================================
+   */
+  
+  /* 圆角 */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+  --shadow-card: 0 2px 8px 0 rgb(0 0 0 / 0.08);
+  --shadow-card-hover: 0 4px 12px 0 rgb(0 0 0 / 0.12);
+
+  /* 过渡 */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* 
+ * ==========================================
+ * 全局基础样式重置与应用
+ * ==========================================
+ */
+body {
+  font-family: var(--font-family-base);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-default);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text-primary);
+  font-weight: 700;
+  line-height: var(--line-height-tight);
+}
+
+h1 { font-size: var(--font-size-3xl); }
+h2 { font-size: var(--font-size-2xl); }
+h3 { font-size: var(--font-size-xl); }
+
+p {
+  margin-bottom: var(--space-2);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.card-base {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border);
+  padding: var(--space-3);
+  transition: all var(--transition-normal);
+}
+
+.card-base:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+.btn-primary {
+  background-color: var(--color-primary-main);
+  color: white;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 增强的卡片样式 */
+.card-enhanced {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border);
+  padding: var(--space-3);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary-main), var(--color-secondary-main));
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.card-enhanced:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+  border-color: var(--color-primary-light);
+}
+
+.card-enhanced:hover::before {
+  opacity: 1;
+}
+
+/* 骨架屏动画 */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-neutral-light) 0px,
+    #f8f9fa 40px,
+    var(--color-neutral-light) 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+/* 淡入动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-normal) ease-out;
+}
+
+/* 脉冲动画（用于加载状态） */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 滑动进入动画 */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in-up {
+  animation: slideInUp var(--transition-normal) ease-out;
+}
+
+/* 渐变背景工具类 */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary-main) 0%, var(--color-primary-dark) 100%);
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, var(--color-secondary-main) 0%, var(--color-secondary-dark) 100%);
+}
+
+.gradient-mixed {
+  background: linear-gradient(135deg, var(--color-primary-main) 0%, var(--color-secondary-main) 100%);
+}

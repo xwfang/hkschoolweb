@@ -16,8 +16,8 @@ export function BottomNav() {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background">
-      <div className="flex h-16 items-center justify-around px-2">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-sm shadow-lg">
+      <div className="flex h-16 items-center justify-around px-2 safe-area-pb">
         {navItems.map((item) => {
           const isActive = path === item.path;
           return (
@@ -25,12 +25,24 @@ export function BottomNav() {
               key={item.path}
               to={item.path}
               className={cn(
-                "flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-primary",
-                isActive && "text-primary"
+                "flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs font-medium transition-all duration-200 relative",
+                isActive 
+                  ? "text-primary" 
+                  : "text-muted-foreground hover:text-primary active:scale-95"
               )}
             >
-              <item.icon className={cn("h-5 w-5", isActive && "fill-current")} />
-              <span>{item.label}</span>
+              <div className={cn(
+                "absolute inset-0 rounded-lg transition-all duration-200",
+                isActive && "bg-primary/10"
+              )} />
+              <item.icon className={cn(
+                "h-5 w-5 relative z-10 transition-transform duration-200",
+                isActive && "fill-current scale-110"
+              )} />
+              <span className={cn(
+                "relative z-10 transition-all duration-200",
+                isActive && "font-semibold"
+              )}>{item.label}</span>
             </Link>
           );
         })}

@@ -204,10 +204,10 @@ export default function HomePage() {
               <button
                 key={filter.label}
                 onClick={() => handleFilterClick(filter.value)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 border ${
                   activeFilter === filter.value
-                    ? "bg-indigo-600 text-white border-indigo-600"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+                    ? "bg-indigo-600 text-white border-indigo-600 shadow-md scale-105"
+                    : "bg-white text-gray-600 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 active:scale-95"
                 }`}
               >
                 <filter.icon className="h-3.5 w-3.5" />
@@ -219,9 +219,9 @@ export default function HomePage() {
 
         {/* AI Recommendation Banner (Only when no search/filter) */}
         {!searchQuery && !activeFilter && matchData?.analysis && (
-          <section className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-4 text-white shadow-lg">
+          <section className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-4 text-white shadow-lg hover:shadow-xl transition-shadow duration-300 animate-fade-in">
             <div className="flex items-start gap-3">
-              <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+              <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm shadow-sm">
                 <BookOpen className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -236,9 +236,11 @@ export default function HomePage() {
 
         {/* Fallback Hint */}
         {isFallback && (
-          <div className="bg-orange-50 text-orange-800 text-xs px-4 py-2 rounded-lg flex items-center gap-2">
-            <span className="text-lg">💡</span>
-            {t('home.no_matches_fallback', '暂无针对该子女的个性化匹配，为您展示热门学校。')}
+          <div className="bg-gradient-to-r from-orange-50 to-amber-50 text-orange-800 text-xs px-4 py-3 rounded-lg flex items-center gap-2 border border-orange-200 shadow-sm">
+            <div className="bg-orange-100 rounded-full p-1.5">
+              <span className="text-base">💡</span>
+            </div>
+            <p className="flex-1">{t('home.no_matches_fallback', '暂无针对该子女的个性化匹配，为您展示热门学校。')}</p>
           </div>
         )}
 
@@ -252,7 +254,7 @@ export default function HomePage() {
             {isLoadingMatches ? (
               <div className="text-center text-sm text-gray-500 py-8">
                 <div className="animate-spin h-6 w-6 border-2 border-indigo-600 border-t-transparent rounded-full mx-auto mb-2"></div>
-                {t('home.loading')}
+                <p className="animate-pulse">{t('home.loading')}</p>
               </div>
             ) : displaySchools?.map((school) => {
               const isTracked = trackedSchoolIds.has(school.id);
@@ -261,7 +263,7 @@ export default function HomePage() {
               const secondaryName = isEnglish ? school.name_cn : school.name_en;
 
               return (
-                <Card key={school.id} className="cursor-pointer active:bg-gray-50 overflow-hidden border-none shadow-sm ring-1 ring-gray-100" onClick={() => navigate(`/app/school/${school.id}`)}>
+                <Card key={school.id} className="cursor-pointer active:scale-[0.98] overflow-hidden border-none shadow-sm ring-1 ring-gray-100 hover:ring-indigo-200 hover:shadow-md transition-all duration-200" onClick={() => navigate(`/app/school/${school.id}`)}>
                   <CardContent className="p-0">
                     <div className="p-3 flex justify-between items-start gap-3">
                       <div className="flex-1 text-left">
@@ -318,11 +320,18 @@ export default function HomePage() {
             })}
             
             {displaySchools?.length === 0 && (
-              <div className="text-center text-gray-500 py-12 bg-gray-50 rounded-lg border border-dashed">
-                <SchoolIcon className="h-8 w-8 mx-auto text-gray-300 mb-2" />
-                <p>{t('home.no_matches')}</p>
+              <div className="text-center text-gray-500 py-16 bg-gradient-to-b from-gray-50 to-white rounded-xl border-2 border-dashed border-gray-200">
+                <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <SchoolIcon className="h-8 w-8 text-indigo-500" />
+                </div>
+                <p className="text-base font-medium text-gray-700 mb-1">{t('home.no_matches')}</p>
+                <p className="text-sm text-gray-400 mb-4">尝试调整筛选条件或搜索关键词</p>
                 {(activeFilter || searchQuery) && (
-                  <Button variant="link" onClick={() => { setActiveFilter(""); setSearchQuery(""); }}>
+                  <Button 
+                    variant="outline" 
+                    className="mt-2"
+                    onClick={() => { setActiveFilter(""); setSearchQuery(""); }}
+                  >
                     {t('home.clear_filters')}
                   </Button>
                 )}

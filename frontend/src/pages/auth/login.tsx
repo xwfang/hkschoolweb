@@ -64,16 +64,16 @@ export default function LoginPage() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('auth.login_title')}</CardTitle>
-        <CardDescription>
+    <Card className="shadow-xl border-0">
+      <CardHeader className="space-y-2">
+        <CardTitle className="text-2xl">{t('auth.login_title')}</CardTitle>
+        <CardDescription className="text-base">
           {step === "phone" ? t('auth.phone_step_desc') : t('auth.otp_step_desc')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {error && (
-          <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
+          <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md border border-red-200 animate-fade-in">
             {error}
           </div>
         )}

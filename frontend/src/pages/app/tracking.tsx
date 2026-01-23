@@ -6,7 +6,7 @@ import { childrenApi } from "@/api/children";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
-import { FileText, Save, X, User } from "lucide-react";
+import { FileText, Save, X, User, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function ApplicationCard({ app, statusMap, childName }: { app: Application; statusMap: Record<string, { label: string; color: string }>; childName?: string }) {
@@ -41,7 +41,7 @@ function ApplicationCard({ app, statusMap, childName }: { app: Application; stat
 
   return (
     <Card 
-      className="cursor-pointer active:bg-gray-50 transition-all"
+      className="cursor-pointer active:scale-[0.98] transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 border-gray-100"
       onClick={() => navigate(`/app/school/${app.school_id}`)}
     >
       <CardHeader className="p-3 pb-2">
@@ -181,8 +181,12 @@ export default function TrackingPage() {
       {isLoading ? (
         <div className="text-center text-sm text-gray-500">{t('common.loading')}</div>
       ) : applications?.length === 0 ? (
-        <div className="text-center text-gray-500 py-8 border rounded-lg border-dashed">
-          {t('tracking.no_schools') || '暂无关注的学校'}
+        <div className="text-center text-gray-500 py-16 bg-gradient-to-b from-gray-50 to-white rounded-xl border-2 border-dashed border-gray-200">
+          <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <BookOpen className="h-8 w-8 text-indigo-500" />
+          </div>
+          <p className="text-base font-medium text-gray-700 mb-1">{t('tracking.no_schools') || '暂无关注的学校'}</p>
+          <p className="text-sm text-gray-400">去首页发现更多学校吧</p>
         </div>
       ) : (
         <div className="space-y-3">
