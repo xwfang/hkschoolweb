@@ -58,7 +58,8 @@
     "target": "Target",
     "edit": "Edit",
     "tools": "Learning Tools",
-    "dictation": "Dictation"
+    "dictation": "Dictation Assistant",
+    "dictation_desc": "Helper for students' dictation practice"
   },
   "common": {
     "loading": "Loading...",

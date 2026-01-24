@@ -13,6 +13,8 @@
     "band_1": "Band 1",
     "quick_filters": "快速篩選",
     "ai_recommendation": "AI 擇校建議",
+    "dictation": "聽寫助手",
+    "dictation_desc": "中小學生單詞/短文聽寫輔助",
     "all_schools": "所有學校",
     "no_matches": "未找到匹配的學校",
     "no_matches_fallback": "暫無針對該子女的個性化匹配，為您展示熱門學校。",

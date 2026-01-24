@@ -136,8 +136,8 @@ export default function ProfilePage() {
               <Headphones className="h-5 w-5" />
             </div>
             <div className="flex-1">
-              <h4 className="font-medium">{t('profile.dictation')}</h4>
-              <p className="text-xs text-muted-foreground">中小学生单词/短文听写辅助</p>
+              <h4 className="font-medium">{t('profile.dictation', '听写助手')}</h4>
+              <p className="text-xs text-muted-foreground">{t('profile.dictation_desc', '中小学生单词/短文听写辅助')}</p>
             </div>
           </CardContent>
         </Card>
