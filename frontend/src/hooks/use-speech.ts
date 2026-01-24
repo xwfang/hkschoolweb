@@ -28,8 +28,25 @@ export function useSpeech() {
       // Chrome requires this event to load voices
       window.speechSynthesis.onvoiceschanged = updateVoices;
       
+      // Fallback: poll for voices if they are not loaded yet (common issue on Android Chrome)
+      const intervalId = setInterval(() => {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          setVoices(voices);
+          // Don't clear interval immediately, keep checking for a bit in case more voices load
+          // But actually, getVoices returns the current list.
+        }
+      }, 500);
+
+      // Stop polling after 5 seconds to avoid performance impact
+      const timeoutId = setTimeout(() => {
+        clearInterval(intervalId);
+      }, 5000);
+
       return () => {
         window.speechSynthesis.onvoiceschanged = null;
+        clearInterval(intervalId);
+        clearTimeout(timeoutId);
         if (synthesis.current) {
           synthesis.current.cancel();
         }

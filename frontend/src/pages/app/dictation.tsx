@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Play, Pause, Square, Settings2, Volume2, Info } from "lucide-react";
+import { ArrowLeft, Play, Pause, Square, Volume2, Info, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
 import { useSpeech } from "@/hooks/use-speech";
 import {
   Tooltip,
@@ -43,6 +43,7 @@ export default function DictationPage() {
   const [interval, setInterval] = useState(() => getStoredSetting('interval', 3));
   const [selectedVoiceURI, setSelectedVoiceURI] = useState<string>(() => localStorage.getItem('dictation_voiceURI') || "");
   const [hideText, setHideText] = useState(true);
+  const [splitBySpace, setSplitBySpace] = useState(() => localStorage.getItem('dictation_splitBySpace') === 'true');
 
   // Save settings when they change
   useEffect(() => {
@@ -51,18 +52,33 @@ export default function DictationPage() {
     localStorage.setItem('dictation_repeatCount', String(repeatCount));
     localStorage.setItem('dictation_interval', String(interval));
     localStorage.setItem('dictation_voiceURI', selectedVoiceURI);
-  }, [rate, pitch, repeatCount, interval, selectedVoiceURI]);
+    localStorage.setItem('dictation_splitBySpace', String(splitBySpace));
+  }, [rate, pitch, repeatCount, interval, selectedVoiceURI, splitBySpace]);
 
   // Refs for managing playback loop
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [currentRepeat, setCurrentRepeat] = useState(0);
   const playQueueRef = useRef<{text: string, index: number, repeatIndex: number}[]>([]);
+  const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   
   // Derived state
   const currentItem = items[currentIndex] || "";
   const progress = items.length > 0 ? ((currentIndex + 1) / items.length) * 100 : 0;
   
-  // Filter and Sort voices
+  // Periodically check for voices if they are empty (fix for some Android devices)
+  // Note: We also improved useSpeech hook to do polling, but keeping a listener here just in case doesn't hurt,
+  // although it's better to rely on the hook.
+  // We'll remove the interval here since we moved logic to useSpeech.
+  
+  const getLanguageLabel = (lang: string) => {
+    const l = lang.toLowerCase();
+    if (l.includes('hk') || l.includes('cantonese')) return '🇭🇰 粤语 (Cantonese)';
+    if (l.includes('tw')) return '🇹🇼 国语 (Taiwan)';
+    if (l.includes('cn') || (l.includes('zh') && !l.includes('hk') && !l.includes('tw'))) return '🇨🇳 普通话 (Mandarin)';
+    if (l.includes('en')) return '🇺🇸/🇬🇧 英语 (English)';
+    return lang;
+  };
+
   const sortedVoices = useMemo(() => {
     return voices
       .filter(voice => {
@@ -78,15 +94,30 @@ export default function DictationPage() {
         const getScore = (v: SpeechSynthesisVoice) => {
           let score = 0;
           const name = v.name.toLowerCase();
-          if (name.includes('google')) score += 10;
-          if (name.includes('microsoft')) score += 8;
-          if (name.includes('enhanced') || name.includes('premium') || name.includes('high quality')) score += 5;
-          if (v.lang.toLowerCase().includes('hk')) score += 2; // Prefer HK voices for this app
+          // Google voices are preferred for Chrome
+          if (name.includes('google')) score += 20;
+          if (name.includes('microsoft')) score += 15;
+          if (name.includes('enhanced') || name.includes('premium') || name.includes('high quality')) score += 10;
+          if (v.lang.toLowerCase().includes('hk')) score += 5; // Prefer HK voices for this app
+          if (v.default) score += 2;
           return score;
         };
         return getScore(b) - getScore(a);
       });
   }, [voices]);
+
+  // Auto-select the best voice if none is selected or current selection is invalid
+  useEffect(() => {
+    if (sortedVoices.length > 0) {
+      const currentVoiceExists = sortedVoices.some(v => v.voiceURI === selectedVoiceURI);
+      if (!selectedVoiceURI || !currentVoiceExists) {
+        // Default to the first voice (highest score)
+        // Since we heavily weight Google voices, this ensures Google is default on Chrome
+        const defaultVoice = sortedVoices[0].voiceURI;
+        setTimeout(() => setSelectedVoiceURI(defaultVoice), 0);
+      }
+    }
+  }, [sortedVoices, selectedVoiceURI]);
 
   // Initialize voice
   useEffect(() => {
@@ -109,12 +140,21 @@ export default function DictationPage() {
   const parseText = () => {
     // Replace punctuation with newlines
     const formattedText = text
-      .replace(/([.!?。！？;；])/g, "$1\n") // Add newline after punctuation
-      .replace(/\n\s*\n/g, "\n"); // Remove empty lines
+      .replace(/([.!?。！？;；,，])/g, "$1\n"); // Add newline after punctuation
       
-    const lines = formattedText.split('\n')
-      .map(s => s.trim())
-      .filter(s => s.length > 0);
+    let lines: string[] = [];
+    
+    if (splitBySpace) {
+      // Split by newlines and spaces
+      lines = formattedText.split(/[\n\s]+/)
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+    } else {
+      // Split by newlines only (punctuation already converted to newlines)
+      lines = formattedText.split('\n')
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+    }
       
     return lines;
   };
@@ -135,10 +175,14 @@ export default function DictationPage() {
     const voice = voices.find(v => v.voiceURI === selectedVoiceURI);
     if (voice) utterance.voice = voice;
 
+    // Keep reference to prevent garbage collection on Android
+    currentUtteranceRef.current = utterance;
+
     utterance.onend = () => {
       // Finished speaking this item
       // Remove from queue
       playQueueRef.current.shift();
+      currentUtteranceRef.current = null;
       
       // Wait for interval
       timerRef.current = setTimeout(() => {
@@ -174,6 +218,11 @@ export default function DictationPage() {
     // Ensure audio context is unlocked for mobile
     window.speechSynthesis.cancel();
     window.speechSynthesis.resume(); 
+
+    // Force voice loading on Android if empty
+    if (voices.length === 0) {
+      window.speechSynthesis.getVoices();
+    }
     
     // Build Queue
     const queue: {text: string, index: number, repeatIndex: number}[] = [];
@@ -198,6 +247,7 @@ export default function DictationPage() {
       timerRef.current = null;
     }
     playQueueRef.current = [];
+    currentUtteranceRef.current = null;
   };
 
   // Clean up on unmount
@@ -242,19 +292,26 @@ export default function DictationPage() {
         {/* Input Area - Only show when not playing */}
         {!isPlaying && (
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">{t('dictation.input_label', '请输入听写内容')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <Textarea 
-                placeholder={t('dictation.placeholder', '粘贴单词或句子，每行一个...')}
+                placeholder={t('dictation.placeholder', '请输入听写内容...')}
                 className="min-h-[200px] text-lg"
                 value={text}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value)}
               />
-              <p className="text-xs text-gray-500 text-right">
-                {text.length}/300
-              </p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="split-by-space" 
+                    checked={splitBySpace} 
+                    onCheckedChange={setSplitBySpace} 
+                  />
+                  <Label htmlFor="split-by-space">{t('dictation.split_by_space', '按空格分割单词')}</Label>
+                </div>
+                <p className="text-xs text-gray-500 text-right">
+                  {text.length}/300
+                </p>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -339,13 +396,7 @@ export default function DictationPage() {
 
         {/* Settings Area */}
         <Card>
-          <CardHeader className="pb-3">
-             <CardTitle className="text-base flex items-center gap-2">
-               <Settings2 className="w-4 h-4" />
-               {t('dictation.settings', '设置')}
-             </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 pt-6">
              <div className="space-y-2">
                <div className="flex items-center justify-between">
                  <Label>{t('dictation.voice', '语音')}</Label>
@@ -368,71 +419,90 @@ export default function DictationPage() {
                     </Tooltip>
                  </TooltipProvider>
                </div>
-               <Select 
+               <div className="flex gap-2">
+               <select 
+                 className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                  value={selectedVoiceURI} 
                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedVoiceURI(e.target.value)}
                >
                  <option value="" disabled>
-                   {t('dictation.select_voice', '选择语音')}
+                   {sortedVoices.length === 0 ? "Loading voices..." : t('dictation.select_voice', '选择语音')}
                  </option>
                  {sortedVoices.map((voice) => (
                    <option key={voice.voiceURI} value={voice.voiceURI}>
-                     {voice.name} ({voice.lang})
+                     {getLanguageLabel(voice.lang)} - {voice.name}
                    </option>
                  ))}
-               </Select>
+               </select>
+               <Button
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0"
+                  onClick={() => {
+                    // Force refresh voices
+                    window.speechSynthesis.getVoices();
+                    // Also try to speak empty string to wake up engine on Android
+                    window.speechSynthesis.cancel();
+                  }}
+                  title="Reload Voices"
+               >
+                  <RefreshCw className="h-4 w-4" />
+               </Button>
+               </div>
              </div>
 
-             <div className="space-y-4">
-               <div className="flex justify-between">
-                 <Label>{t('dictation.rate', '语速')}: {rate}x</Label>
+             <div className="grid grid-cols-2 gap-6">
+               <div className="space-y-4">
+                 <div className="flex justify-between">
+                   <Label>{t('dictation.rate', '语速')}: {rate}x</Label>
+                 </div>
+                 <Slider 
+                   value={[rate]} 
+                   min={0.5} 
+                   max={2} 
+                   step={0.1} 
+                   onValueChange={([v]: number[]) => setRate(v)} 
+                 />
                </div>
-               <Slider 
-                 value={[rate]} 
-                 min={0.5} 
-                 max={2} 
-                 step={0.1} 
-                 onValueChange={([v]: number[]) => setRate(v)} 
-               />
-             </div>
 
-             <div className="space-y-4">
-               <div className="flex justify-between">
-                 <Label>{t('dictation.pitch', '语调')}: {pitch}</Label>
+               <div className="space-y-4">
+                 <div className="flex justify-between">
+                   <Label>{t('dictation.pitch', '语调')}: {pitch}</Label>
+                 </div>
+                 <Slider 
+                   value={[pitch]} 
+                   min={0.5} 
+                   max={2} 
+                   step={0.1} 
+                   onValueChange={([v]: number[]) => setPitch(v)} 
+                 />
                </div>
-               <Slider 
-                 value={[pitch]} 
-                 min={0.5} 
-                 max={2} 
-                 step={0.1} 
-                 onValueChange={([v]: number[]) => setPitch(v)} 
-               />
-             </div>
 
-             <div className="space-y-4">
-               <div className="flex justify-between">
-                 <Label>{t('dictation.interval', '间隔时间')}: {interval}s</Label>
+               <div className="space-y-4">
+                 <div className="flex justify-between">
+                   <Label>{t('dictation.interval', '间隔时间')}: {interval}s</Label>
+                 </div>
+                 <Slider 
+                   value={[interval]} 
+                   min={1} 
+                   max={10} 
+                   step={1} 
+                   onValueChange={([v]: number[]) => setInterval(v)} 
+                 />
                </div>
-               <Slider 
-                 value={[interval]} 
-                 min={1} 
-                 max={10} 
-                 step={1} 
-                 onValueChange={([v]: number[]) => setInterval(v)} 
-               />
-             </div>
 
-             <div className="space-y-4">
-               <div className="flex justify-between">
-                 <Label>{t('dictation.repeat', '重复次数')}: {repeatCount}</Label>
+               <div className="space-y-4">
+                 <div className="flex justify-between">
+                   <Label>{t('dictation.repeat', '重复次数')}: {repeatCount}</Label>
+                 </div>
+                 <Slider 
+                   value={[repeatCount]} 
+                   min={1} 
+                   max={5} 
+                   step={1} 
+                   onValueChange={([v]: number[]) => setRepeatCount(v)} 
+                 />
                </div>
-               <Slider 
-                 value={[repeatCount]} 
-                 min={1} 
-                 max={5} 
-                 step={1} 
-                 onValueChange={([v]: number[]) => setRepeatCount(v)} 
-               />
              </div>
           </CardContent>
         </Card>
