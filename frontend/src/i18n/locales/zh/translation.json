@@ -56,7 +56,9 @@
     "user_title": "家长用户",
     "grade": "年级",
     "target": "目标",
-    "edit": "编辑"
+    "edit": "编辑",
+    "tools": "学习工具",
+    "dictation": "英文听写"
   },
   "common": {
     "loading": "加载中...",

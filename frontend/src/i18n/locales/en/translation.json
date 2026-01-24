@@ -56,7 +56,9 @@
     "user_title": "Parent User",
     "grade": "Grade",
     "target": "Target",
-    "edit": "Edit"
+    "edit": "Edit",
+    "tools": "Learning Tools",
+    "dictation": "Dictation"
   },
   "common": {
     "loading": "Loading...",

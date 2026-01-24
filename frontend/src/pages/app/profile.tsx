@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { User, Settings, LogOut, Plus, Trash2, Crown } from "lucide-react";
+import { User, Settings, LogOut, Plus, Trash2, Crown, Headphones } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { childrenApi } from "@/api/children";
@@ -126,6 +126,21 @@ export default function ProfilePage() {
         )}
         
         <Button className="w-full" variant="outline" onClick={() => navigate("/app/profile/add-child")}>{t('profile.add_child')}</Button>
+      </div>
+
+      <div className="space-y-2 pt-4">
+        <h3 className="text-md font-semibold px-1">{t('profile.tools')}</h3>
+        <Card className="cursor-pointer active:scale-[0.99] transition-all hover:shadow-md" onClick={() => navigate("/app/dictation")}>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <Headphones className="h-5 w-5" />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-medium">{t('profile.dictation')}</h4>
+              <p className="text-xs text-muted-foreground">中小学生单词/短文听写辅助</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="space-y-2 pt-4">
