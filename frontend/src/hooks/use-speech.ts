@@ -139,7 +139,9 @@ export function useSpeech() {
       "Agnes", "Albert", "Bad News", "Bahh", "Bells", "Boing", "Bruce", "Bubbles", 
       "Cellos", "Deranged", "Fred", "Good News", "Hysterical", "Junior", "Kathy", 
       "Pipe Organ", "Princess", "Ralph", "Trinoids", "Vicki", "Victoria", "Whisper", 
-      "Zarvox", "Organ", "Jester", "Superstar", "Wobble"
+      "Zarvox", "Organ", "Jester", "Superstar", "Wobble",
+      // Character voices
+      "Grandma", "Grandpa", "Eddy", "Flo", "Reed", "Rocko", "Sandy", "Shelley"
     ];
 
     return voices
