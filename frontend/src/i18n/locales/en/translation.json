@@ -182,5 +182,20 @@
     "limit_reached_title": "Daily Limit Reached",
     "limit_reached_desc": "You have reached your daily limit for AI features. Upgrade to VIP for unlimited access.",
     "upgrade_now": "Upgrade Now"
+  },
+  "dictation": {
+    "title": "Dictation Assistant",
+    "placeholder": "Enter text for dictation...",
+    "split_by_space": "Split by space",
+    "progress": "Progress",
+    "listening": "Speaking...",
+    "voice": "Voice",
+    "select_voice": "Select Voice",
+    "loading_voices": "Click to load voices...",
+    "rate": "Rate",
+    "pitch": "Pitch",
+    "interval": "Interval",
+    "repeat": "Repeat Count",
+    "start": "Start Dictation"
   }
 }

@@ -26,7 +26,7 @@ declare global {
 export default function DictationPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { voices } = useSpeech();
+  const { voices, refreshVoices } = useSpeech();
 
   // Load settings from localStorage or defaults
   const getStoredSetting = (key: string, defaultVal: number): number => {
@@ -491,9 +491,10 @@ export default function DictationPage() {
                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                  value={selectedVoiceURI} 
                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedVoiceURI(e.target.value)}
+                 onClick={refreshVoices}
                >
                  <option value="" disabled>
-                   {sortedVoices.length === 0 ? "Loading voices..." : t('dictation.select_voice', '选择语音')}
+                   {sortedVoices.length === 0 ? t('dictation.loading_voices', '点击加载语音...') : t('dictation.select_voice', '选择语音')}
                  </option>
                  {sortedVoices.map((voice) => (
                    <option key={voice.voiceURI} value={voice.voiceURI}>
@@ -507,7 +508,7 @@ export default function DictationPage() {
                   className="shrink-0"
                   onClick={() => {
                     // Force refresh voices
-                    window.speechSynthesis.getVoices();
+                    refreshVoices();
                     // Also try to speak empty string to wake up engine on Android
                     window.speechSynthesis.cancel();
                   }}

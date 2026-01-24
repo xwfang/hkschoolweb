@@ -182,5 +182,20 @@
     "limit_reached_title": "今日次数已用完",
     "limit_reached_desc": "您已达到今日 AI 功能使用上限。升级 VIP 可享受无限次使用。",
     "upgrade_now": "立即升级"
+  },
+  "dictation": {
+    "title": "听写助手",
+    "placeholder": "请输入听写内容...",
+    "split_by_space": "按空格分割单词",
+    "progress": "进度",
+    "listening": "正在朗读...",
+    "voice": "语音",
+    "select_voice": "选择语音",
+    "loading_voices": "点击加载语音...",
+    "rate": "语速",
+    "pitch": "语调",
+    "interval": "间隔时间",
+    "repeat": "重复次数",
+    "start": "开始听写"
   }
 }

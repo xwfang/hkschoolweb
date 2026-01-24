@@ -119,6 +119,20 @@ export function useSpeech() {
     }
   }, []);
 
+  const refreshVoices = useCallback(() => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+        const vs = window.speechSynthesis.getVoices();
+        if (vs.length > 0) {
+            setVoices(vs);
+        } else {
+             // Android hack: sometimes we need to speak to wake up the engine
+             // But we don't want to do this automatically too often as it might impact UX
+             // Just trigger getVoices again
+             window.speechSynthesis.getVoices();
+        }
+    }
+  }, []);
+
   return {
     voices,
     speaking,
@@ -126,6 +140,7 @@ export function useSpeech() {
     speak,
     cancel,
     pause,
-    resume
+    resume,
+    refreshVoices
   };
 }
