@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 export interface SpeechOptions {
   rate?: number; // 0.1 - 10
@@ -133,8 +133,39 @@ export function useSpeech() {
     }
   }, []);
 
+  const sortedVoices = useMemo(() => {
+    // Known macOS/iOS novelty/sound-effect voices to exclude
+    const EXCLUDED_VOICES = [
+      "Agnes", "Albert", "Bad News", "Bahh", "Bells", "Boing", "Bruce", "Bubbles", 
+      "Cellos", "Deranged", "Fred", "Good News", "Hysterical", "Junior", "Kathy", 
+      "Pipe Organ", "Princess", "Ralph", "Trinoids", "Vicki", "Victoria", "Whisper", 
+      "Zarvox", "Organ", "Jester", "Superstar", "Wobble"
+    ];
+
+    return voices
+      .filter(voice => {
+        const lang = voice.lang.toLowerCase();
+        const name = voice.name;
+        
+        // Filter by language
+        const isLangMatch = lang.includes('zh') || // Chinese (Generic)
+               lang.includes('cn') || // Mainland China (Simplified)
+               lang.includes('hk') || // Hong Kong (Traditional)
+               lang.includes('tw') || // Taiwan (Traditional)
+               lang.includes('en');   // English (Generic)
+               
+        // Filter out novelty voices
+        const isExcluded = EXCLUDED_VOICES.some(excluded => name.includes(excluded));
+        
+        return isLangMatch && !isExcluded;
+      })
+      .sort((a, b) => {
+        return a.name.localeCompare(b.name);
+      });
+  }, [voices]);
+
   return {
-    voices,
+    voices: sortedVoices,
     speaking,
     paused,
     speak,
