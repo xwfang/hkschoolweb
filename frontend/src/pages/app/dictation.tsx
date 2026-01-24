@@ -16,6 +16,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+// Extend Window interface to prevent GC
+declare global {
+  interface Window {
+    _speechUtterances: SpeechSynthesisUtterance[];
+  }
+}
+
 export default function DictationPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -57,9 +64,25 @@ export default function DictationPage() {
 
   // Refs for managing playback loop
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const watchdogRef = useRef<NodeJS.Timeout | null>(null);
   const [currentRepeat, setCurrentRepeat] = useState(0);
   const playQueueRef = useRef<{text: string, index: number, repeatIndex: number}[]>([]);
+  // We use a window-level array to hold utterances to prevent GC on Android
+  // currentUtteranceRef is kept for compatibility but the real protection is window._speechUtterances
   const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  // Extend Window interface to hold utterances
+  useEffect(() => {
+    if (!window._speechUtterances) {
+      window._speechUtterances = [];
+    }
+    return () => {
+      // Cleanup on unmount
+      if (watchdogRef.current) clearTimeout(watchdogRef.current);
+      window._speechUtterances = [];
+      window.speechSynthesis.cancel();
+    };
+  }, []);
   
   // Derived state
   const currentItem = items[currentIndex] || "";
@@ -160,6 +183,12 @@ export default function DictationPage() {
   };
 
   const processQueue = () => {
+    // Clear previous watchdog
+    if (watchdogRef.current) {
+        clearTimeout(watchdogRef.current);
+        watchdogRef.current = null;
+    }
+
     if (playQueueRef.current.length === 0) {
       setIsPlaying(false);
       return;
@@ -175,10 +204,23 @@ export default function DictationPage() {
     const voice = voices.find(v => v.voiceURI === selectedVoiceURI);
     if (voice) utterance.voice = voice;
 
-    // Keep reference to prevent garbage collection on Android
+    // Add to global array to prevent garbage collection on Android
+    window._speechUtterances.push(utterance);
     currentUtteranceRef.current = utterance;
 
-    utterance.onend = () => {
+    const cleanup = () => {
+        const index = window._speechUtterances.indexOf(utterance);
+        if (index > -1) {
+            window._speechUtterances.splice(index, 1);
+        }
+        if (watchdogRef.current) {
+            clearTimeout(watchdogRef.current);
+            watchdogRef.current = null;
+        }
+    };
+
+    const handleEnd = () => {
+      cleanup();
       // Finished speaking this item
       // Remove from queue
       playQueueRef.current.shift();
@@ -187,8 +229,6 @@ export default function DictationPage() {
       // Wait for interval
       timerRef.current = setTimeout(() => {
         // Check if we should continue (isPlaying might have been set to false by stop)
-        // Accessing state inside timeout is tricky, but playQueueRef is mutable.
-        // If queue was cleared, we stop.
         if (playQueueRef.current.length > 0) {
            processQueue();
         } else {
@@ -197,12 +237,25 @@ export default function DictationPage() {
       }, interval * 1000);
     };
 
+    utterance.onend = handleEnd;
+
     utterance.onerror = (e) => {
         console.error("Speech error", e);
-        // Skip on error
+        cleanup();
+        // Skip on error but wait a bit
         playQueueRef.current.shift();
-        processQueue();
+        setTimeout(processQueue, 500);
     }
+
+    // Watchdog: If onend doesn't fire within expected time + buffer, force next
+    // Estimate duration: 1 char ~ 500ms (generous) + 3s buffer
+    // Minimum 5 seconds
+    const estimatedDuration = Math.max((nextTask.text.length * 500) + 3000, 5000);
+    watchdogRef.current = setTimeout(() => {
+        console.warn("Speech watchdog triggered - forcing next item");
+        window.speechSynthesis.cancel(); // Force stop current
+        handleEnd();
+    }, estimatedDuration);
 
     window.speechSynthesis.speak(utterance);
   };
@@ -217,9 +270,13 @@ export default function DictationPage() {
     
     // Ensure audio context is unlocked for mobile
     window.speechSynthesis.cancel();
-    window.speechSynthesis.resume(); 
-
-    // Force voice loading on Android if empty
+    
+    // Force voice loading on Android if empty and wake up engine
+    // Some Android devices need this "warm up"
+    const wakeUp = new SpeechSynthesisUtterance('');
+    wakeUp.volume = 0; // Silent
+    window.speechSynthesis.speak(wakeUp);
+    
     if (voices.length === 0) {
       window.speechSynthesis.getVoices();
     }
@@ -246,8 +303,14 @@ export default function DictationPage() {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
+    if (watchdogRef.current) {
+        clearTimeout(watchdogRef.current);
+        watchdogRef.current = null;
+    }
     playQueueRef.current = [];
     currentUtteranceRef.current = null;
+    // Clear global utterances
+    window._speechUtterances = [];
   };
 
   // Clean up on unmount
@@ -263,6 +326,10 @@ export default function DictationPage() {
     if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
+    }
+    if (watchdogRef.current) {
+        clearTimeout(watchdogRef.current);
+        watchdogRef.current = null;
     }
   };
 
