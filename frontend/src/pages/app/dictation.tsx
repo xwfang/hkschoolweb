@@ -163,7 +163,7 @@ export default function DictationPage() {
   const parseText = () => {
     // Replace punctuation with newlines
     const formattedText = text
-      .replace(/([.!?。！？;；,，])/g, "$1\n"); // Add newline after punctuation
+      .replace(/([.!?。！？;；,，：、…—])/g, "$1\n"); // Add newline after punctuation
       
     let lines: string[] = [];
     
