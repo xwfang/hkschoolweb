@@ -1,0 +1,1 @@
+import{t as e}from"./client-BM3oM8Q4.js";const t={create:async t=>(await e.post(`/applications`,t)).data,list:async t=>(await e.get(`/applications`,{params:t?{child_id:t}:{}})).data,update:async(t,n)=>(await e.put(`/applications/${t}`,n)).data};export{t};

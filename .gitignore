@@ -33,6 +33,6 @@ temp_data/
 !frontend/src/i18n/locales/**/*.json
 
 # Deployment artifacts
-deploy-package/
+# deploy-package/
 
 
