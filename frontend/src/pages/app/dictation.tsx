@@ -492,6 +492,9 @@ export default function DictationPage() {
                  value={selectedVoiceURI} 
                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedVoiceURI(e.target.value)}
                  onClick={refreshVoices}
+                 onFocus={refreshVoices}
+                 onMouseDown={refreshVoices}
+                 onTouchStart={refreshVoices}
                >
                  <option value="" disabled>
                    {sortedVoices.length === 0 ? t('dictation.loading_voices', '点击加载语音...') : t('dictation.select_voice', '选择语音')}

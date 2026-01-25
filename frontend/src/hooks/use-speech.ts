@@ -14,6 +14,8 @@ export function useSpeech() {
   const [paused, setPaused] = useState(false);
   const synthesis = useRef<SpeechSynthesis | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const refreshingVoicesRef = useRef<boolean>(false);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
@@ -47,6 +49,10 @@ export function useSpeech() {
         window.speechSynthesis.onvoiceschanged = null;
         clearInterval(intervalId);
         clearTimeout(timeoutId);
+        if (pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
         if (synthesis.current) {
           synthesis.current.cancel();
         }
@@ -121,14 +127,81 @@ export function useSpeech() {
 
   const refreshVoices = useCallback(() => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
-        const vs = window.speechSynthesis.getVoices();
+        // First, try to get voices directly
+        let vs = window.speechSynthesis.getVoices();
+        
         if (vs.length > 0) {
             setVoices(vs);
-        } else {
-             // Android hack: sometimes we need to speak to wake up the engine
-             // But we don't want to do this automatically too often as it might impact UX
-             // Just trigger getVoices again
-             window.speechSynthesis.getVoices();
+            refreshingVoicesRef.current = false;
+            // Clear any existing poll interval
+            if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+                pollIntervalRef.current = null;
+            }
+        } else if (!refreshingVoicesRef.current) {
+            // Only start refresh if not already refreshing
+            refreshingVoicesRef.current = true;
+            
+            // Android hack: wake up the engine by speaking an empty, silent utterance
+            // This is necessary because Android Chrome doesn't load voices until the engine is "woken up"
+            const wakeUpUtterance = new SpeechSynthesisUtterance('');
+            wakeUpUtterance.volume = 0; // Silent
+            
+            const finishRefresh = () => {
+                refreshingVoicesRef.current = false;
+                if (pollIntervalRef.current) {
+                    clearInterval(pollIntervalRef.current);
+                    pollIntervalRef.current = null;
+                }
+            };
+            
+            wakeUpUtterance.onstart = () => {
+                // Cancel immediately after starting (it's silent anyway)
+                window.speechSynthesis.cancel();
+            };
+            wakeUpUtterance.onend = () => {
+                // After the engine is woken up, get voices again
+                setTimeout(() => {
+                    vs = window.speechSynthesis.getVoices();
+                    if (vs.length > 0) {
+                        setVoices(vs);
+                        finishRefresh();
+                    }
+                }, 100);
+            };
+            wakeUpUtterance.onerror = () => {
+                // Even on error, try to get voices
+                setTimeout(() => {
+                    vs = window.speechSynthesis.getVoices();
+                    if (vs.length > 0) {
+                        setVoices(vs);
+                        finishRefresh();
+                    }
+                }, 100);
+            };
+            
+            // Cancel any ongoing speech first
+            window.speechSynthesis.cancel();
+            // Speak the wake-up utterance
+            window.speechSynthesis.speak(wakeUpUtterance);
+            
+            // Also try polling as a fallback
+            let pollCount = 0;
+            // Clear any existing poll interval
+            if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+            }
+            pollIntervalRef.current = setInterval(() => {
+                pollCount++;
+                vs = window.speechSynthesis.getVoices();
+                if (vs.length > 0) {
+                    setVoices(vs);
+                    finishRefresh();
+                } else if (pollCount >= 10) {
+                    // Stop polling after 5 seconds (10 * 500ms)
+                    finishRefresh();
+                }
+            }, 500);
         }
     }
   }, []);
