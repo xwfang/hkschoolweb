@@ -4,7 +4,7 @@
 
 ## 目录结构
 - `html/`: 前端静态资源 (构建产物)
-- `docker-compose.yml`: Docker 编排文件
+- `docker compose.yml`: Docker 编排文件
 - `nginx.conf`: Nginx 配置文件
 - `deploy.sh`: 自动部署脚本
 - `view-logs.sh`: 查看日志脚本

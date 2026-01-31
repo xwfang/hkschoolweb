@@ -8,7 +8,7 @@
 DEFAULT_IP="101.47.72.93"
 REMOTE_USER="root"
 REMOTE_DIR="/opt/hkschoolweb"
-CONTAINER_NAME="hkschoolweb" # 需与 docker-compose.yml 中的 container_name 一致
+CONTAINER_NAME="hkschoolweb" # 需与 docker compose.yml 中的 container_name 一致
 
 # 获取参数
 SERVER_IP=${1:-$DEFAULT_IP}
@@ -92,11 +92,11 @@ log_info "🔄 [3/4] 重启服务..."
 # 使用 && 连接命令，确保任何一步失败都会被捕获
 ssh $REMOTE_USER@$SERVER_IP "cd $REMOTE_DIR && \
     echo 'Stopping existing containers...' && \
-    docker-compose down && \
+    docker compose down && \
     echo 'Force removing potential conflict container...' && \
     docker rm -f $CONTAINER_NAME 2>/dev/null || true && \
     echo 'Starting new containers...' && \
-    docker-compose up -d"
+    docker compose up -d"
 
 if [ $? -ne 0 ]; then
     log_error "服务重启命令执行失败"
