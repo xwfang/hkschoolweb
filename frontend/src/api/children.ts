@@ -51,8 +51,8 @@ export const childrenApi = {
   },
 
   // 2.5 Get School Matches
-  getMatches: async (id: number) => {
-    const response = await api.get<MatchResult>(`/children/${id}/matches`);
+  getMatches: async (id: number, params?: { page?: number; limit?: number }) => {
+    const response = await api.get<MatchResult>(`/children/${id}/matches`, { params });
     return response.data;
   },
 };

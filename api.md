@@ -79,14 +79,18 @@ LLM-powered endpoints have a daily usage limit per user.
     "payment_remark": "WeChat Pay: Transaction ID 2024..."
   }
   ```
-- **Response**: `201 Created`
+- **Response**: `200 OK`
   ```json
   {
-    "message": "Order submitted. Please wait for admin approval.",
-    "order_id": 1,
-    "status": "pending_review"
+    "message": "Order submitted. VIP activated immediately.",
+    "order_id": "2026012717-123456",
+    "vip_expire_at": "2026-02-26T17:30:00Z"
   }
   ```
+- **Note**: The `order_id` follows the format `YYYYMMDDHH-XXXXXX`, where:
+  - `YYYYMMDDHH`: Year, Month, Day, and Hour (24-hour format) when the order was created
+  - `XXXXXX`: 6-digit random number
+  - Example: `2026012717-123456` represents an order created on January 27, 2026 at 17:00 (5 PM)
 
 ### 7.3 List Orders (Admin Only)
 - **Endpoint**: `GET /orders`
@@ -106,74 +110,7 @@ LLM-powered endpoints have a daily usage limit per user.
   ```
 - **Response**:
   - If confirmed: Updates order status to `confirmed` and extends user's `vip_expire_at`.
-  - If rejected: Updates order status to `rejected`.
-
----
-
-## 7. Membership (VIP)
-*Requires Auth Header*
-
-### 7.1 List Membership Plans
-- **Endpoint**: `GET /plans`
-- **Description**: Returns a list of available VIP subscription plans.
-- **Response**:
-  ```json
-  [
-    {
-      "id": 1,
-      "name": "Monthly VIP",
-      "price": 30,
-      "duration_days": 30,
-      "description": "Unlock all premium features for 30 days"
-    },
-    {
-      "id": 2,
-      "name": "Annual VIP",
-      "price": 300,
-      "duration_days": 365,
-      "description": "Best value, valid for 365 days"
-    }
-  ]
-  ```
-
-### 7.2 Create Order (Subscribe)
-- **Endpoint**: `POST /orders`
-- **Description**: Creates a new subscription order. The user pays offline (e.g., via WeChat/Alipay personal code) and submits the payment details here.
-- **Request Body**:
-  ```json
-  {
-    "plan_id": 1,
-    "payment_remark": "WeChat Pay: Transaction ID 2024..."
-  }
-  ```
-- **Response**: `201 Created`
-  ```json
-  {
-    "message": "Order submitted. Please wait for admin approval.",
-    "order_id": 1,
-    "status": "pending_review"
-  }
-  ```
-
-### 7.3 List Orders (Admin Only)
-- **Endpoint**: `GET /orders`
-- **Requires**: Admin Role
-- **Description**: Lists all subscription orders, sorted by newest first.
-- **Response**: Array of Order objects with user and plan details.
-
-### 7.4 Review Order (Admin Only)
-- **Endpoint**: `POST /orders/:id/review`
-- **Requires**: Admin Role
-- **Description**: Approve or reject a pending order.
-- **Request Body**:
-  ```json
-  {
-    "action": "confirm" // "confirm" or "reject"
-  }
-  ```
-- **Response**:
-  - If confirmed: Updates order status to `confirmed` and extends user's `vip_expire_at`.
-  - If rejected: Updates order status to `rejected`.
+  - If rejected: Updates order status to `rejected` (and revokes VIP if it was provisionally granted).
 - **Response**:
   ```json
   {
@@ -383,6 +320,17 @@ LLM-powered endpoints have a daily usage limit per user.
     "notes": "Submitted online form on Jan 3rd"
   }
   ```
+
+### 4.4 Delete Application (取消关注)
+- **Endpoint**: `DELETE /applications/:id`
+- **Description**: Removes a tracking record for a school. This effectively "unfollows" or cancels the interest in a school. **Note**: Deleting an application automatically decrements the school's `popularity` score by 1.
+- **Response**: `200 OK`
+  ```json
+  {
+    "message": "Application deleted"
+  }
+  ```
+- **Note**: Only applications belonging to the authenticated user's children can be deleted.
 
 ---
 

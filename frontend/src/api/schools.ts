@@ -36,19 +36,8 @@ export const schoolsApi = {
 
   // 3.1.5 Get School by ID
   get: async (id: string | number) => {
-    // If we have a numeric ID, we should try to fetch it from the list if possible
-    // But since we need a dedicated endpoint, let's verify if the backend supports GET /schools/:id
-    // If not, we might need to search for it by name or handle it differently
-    try {
-      const response = await api.get<School>(`/schools/${id}`);
-      return response.data;
-    } catch (error) {
-       // Fallback: If GET /schools/:id fails (e.g. 404), try to find it via search if we have enough info,
-       // or just return null and let the UI handle it. 
-       // For now, let's just return null if it's a 404 to avoid infinite loading.
-       console.error("Failed to fetch school detail:", error);
-       return null;
-    }
+    const response = await api.get<School>(`/schools/${id}`);
+    return response.data;
   },
 
   // 3.2 Create School (Admin)
