@@ -186,7 +186,10 @@
   "dictation": {
     "title": "Dictation Assistant",
     "placeholder": "Enter text for dictation...",
-    "split_by_space": "Split by space",
+    "split_by_space": "Split by Space (Word Mode)",
+    "smart_split": "Smart Split (Sentence Mode)",
+    "smart_split_desc": "Auto split long sentences",
+    "max_chars": "Max Chars/Segment",
     "progress": "Progress",
     "listening": "Speaking...",
     "voice": "Voice",
@@ -196,6 +199,10 @@
     "pitch": "Pitch",
     "interval": "Interval",
     "repeat": "Repeat Count",
-    "start": "Start Dictation"
+    "start": "Start Dictation",
+    "stop": "Stop",
+    "previous": "Previous",
+    "next": "Next",
+    "toggle_text": "Show/Hide Text"
   }
 }

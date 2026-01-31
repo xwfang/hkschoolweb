@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Play, Pause, Square, Volume2, Info, RefreshCw } from "lucide-react";
+import { ArrowLeft, Play, Pause, Square, Volume2, Info, RefreshCw, SkipBack, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
@@ -51,6 +51,8 @@ export default function DictationPage() {
   const [selectedVoiceURI, setSelectedVoiceURI] = useState<string>(() => localStorage.getItem('dictation_voiceURI') || "");
   const [hideText, setHideText] = useState(true);
   const [splitBySpace, setSplitBySpace] = useState(() => localStorage.getItem('dictation_splitBySpace') === 'true');
+  const [useSmartSplit, setUseSmartSplit] = useState(() => localStorage.getItem('dictation_useSmartSplit') !== 'false'); // Default true
+  const [maxChunkLength, setMaxChunkLength] = useState(() => getStoredSetting('maxChunkLength', 15));
 
   // Save settings when they change
   useEffect(() => {
@@ -60,13 +62,16 @@ export default function DictationPage() {
     localStorage.setItem('dictation_interval', String(interval));
     localStorage.setItem('dictation_voiceURI', selectedVoiceURI);
     localStorage.setItem('dictation_splitBySpace', String(splitBySpace));
-  }, [rate, pitch, repeatCount, interval, selectedVoiceURI, splitBySpace]);
+    localStorage.setItem('dictation_useSmartSplit', String(useSmartSplit));
+    localStorage.setItem('dictation_maxChunkLength', String(maxChunkLength));
+  }, [rate, pitch, repeatCount, interval, selectedVoiceURI, splitBySpace, useSmartSplit, maxChunkLength]);
 
   // Refs for managing playback loop
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const watchdogRef = useRef<NodeJS.Timeout | null>(null);
   const [currentRepeat, setCurrentRepeat] = useState(0);
   const playQueueRef = useRef<{text: string, index: number, repeatIndex: number}[]>([]);
+  const queueIndexRef = useRef(0);
   // We use a window-level array to hold utterances to prevent GC on Android
   // currentUtteranceRef is kept for compatibility but the real protection is window._speechUtterances
   const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -160,10 +165,65 @@ export default function DictationPage() {
     }
   }, [voices, sortedVoices, selectedVoiceURI]);
 
+  const smartSplitText = (text: string, maxLen: number) => {
+    // Basic browser support check for Intl.Segmenter
+    // @ts-expect-error Intl.Segmenter might not be in TS lib
+    if (typeof Intl === 'undefined' || !Intl.Segmenter) {
+      return [text];
+    }
+
+    const voice = voices.find(v => v.voiceURI === selectedVoiceURI);
+    // Use the voice's language, or fallback to zh-CN. 
+    // Intl.Segmenter handles most BCP 47 tags correctly.
+    const locale = voice?.lang || 'zh-CN';
+
+    // @ts-expect-error Intl.Segmenter might not be in TS lib
+    const segmenter = new Intl.Segmenter(locale, { granularity: 'word' });
+    const segments = segmenter.segment(text);
+    const result: string[] = [];
+    let currentChunk = "";
+
+    for (const { segment } of segments) {
+       if (currentChunk.length + segment.length > maxLen && currentChunk.length > 0) {
+           result.push(currentChunk);
+           currentChunk = "";
+       }
+       currentChunk += segment;
+    }
+    if (currentChunk.length > 0) {
+        result.push(currentChunk);
+    }
+    return result;
+  };
+
   const parseText = () => {
-    // Replace punctuation with newlines
-    const formattedText = text
-      .replace(/([.!?。！？;；,，：、…—])/g, "$1\n"); // Add newline after punctuation
+    let formattedText = text;
+    
+    // 1. First handle paired punctuation - protect them from being split
+    // Replace opening brackets with temporary placeholders if needed, 
+    // but here we just want to ensure we don't split AFTER an opening bracket.
+    // Actually, the previous logic was splitting after ANY of these characters.
+    // We should ONLY split after CLOSING brackets or sentence-ending punctuation.
+
+    // 2. Define splitting rules
+     // 2. Define splitting rules
+     // Rule 1: Split after sentence enders and closing brackets
+     // Split after: . ! ? ; , : 。 ！？ ； ， ： 、 … —
+     // AND Split after closing brackets: 」 』 ） 】 ) 》 ” ’ ] }
+     // BUT we use a negative lookahead (?![...]) to ensure we DON'T split if the NEXT character is also a punctuation mark
+     // This prevents splitting "Hello!?" into "Hello!" and "?"
+     formattedText = formattedText
+        .replace(/([.!?。！？;；,，：、…—」』）】)》”’\]}]+)(?![.!?。！？;；,，：、…—」』）】)》”’\]}])/g, "$1\n"); 
+
+     // Rule 2: Split BEFORE opening brackets (so they start a new line)
+     // Split before: 「 『 （ 【 ( 《 “ ‘ [ {
+     // We use a positive lookahead to find the opening bracket and insert a newline before it
+     // But we need to be careful not to create double newlines if there was already a split
+     formattedText = formattedText
+        .replace(/([「『（【(《“‘[{])/g, "\n$1");
+
+     // Cleanup: Remove multiple newlines created by overlapping rules
+     formattedText = formattedText.replace(/\n+/g, "\n");
       
     let lines: string[] = [];
     
@@ -177,6 +237,11 @@ export default function DictationPage() {
       lines = formattedText.split('\n')
         .map(s => s.trim())
         .filter(s => s.length > 0);
+
+      // Apply smart splitting if enabled
+      if (useSmartSplit) {
+        lines = lines.flatMap(line => smartSplitText(line, maxChunkLength));
+      }
     }
       
     return lines;
@@ -189,12 +254,12 @@ export default function DictationPage() {
         watchdogRef.current = null;
     }
 
-    if (playQueueRef.current.length === 0) {
+    if (queueIndexRef.current >= playQueueRef.current.length) {
       setIsPlaying(false);
       return;
     }
 
-    const nextTask = playQueueRef.current[0];
+    const nextTask = playQueueRef.current[queueIndexRef.current];
     setCurrentIndex(nextTask.index);
     setCurrentRepeat(nextTask.repeatIndex);
 
@@ -222,14 +287,15 @@ export default function DictationPage() {
     const handleEnd = () => {
       cleanup();
       // Finished speaking this item
-      // Remove from queue
-      playQueueRef.current.shift();
       currentUtteranceRef.current = null;
+      
+      // Move to next item
+      queueIndexRef.current++;
       
       // Wait for interval
       timerRef.current = setTimeout(() => {
         // Check if we should continue (isPlaying might have been set to false by stop)
-        if (playQueueRef.current.length > 0) {
+        if (queueIndexRef.current < playQueueRef.current.length) {
            processQueue();
         } else {
            setIsPlaying(false);
@@ -243,7 +309,7 @@ export default function DictationPage() {
         console.error("Speech error", e);
         cleanup();
         // Skip on error but wait a bit
-        playQueueRef.current.shift();
+        queueIndexRef.current++;
         setTimeout(processQueue, 500);
     }
 
@@ -290,6 +356,7 @@ export default function DictationPage() {
     });
     
     playQueueRef.current = queue;
+    queueIndexRef.current = 0;
     
     // Process immediately without timeout to satisfy mobile user interaction requirements
     processQueue();
@@ -308,6 +375,7 @@ export default function DictationPage() {
         watchdogRef.current = null;
     }
     playQueueRef.current = [];
+    queueIndexRef.current = 0;
     currentUtteranceRef.current = null;
     // Clear global utterances
     window._speechUtterances = [];
@@ -336,9 +404,52 @@ export default function DictationPage() {
   const resumePlayback = () => {
       window.speechSynthesis.resume();
       setIsPaused(false);
-      if (!window.speechSynthesis.speaking && playQueueRef.current.length > 0) {
+      if (!window.speechSynthesis.speaking && queueIndexRef.current < playQueueRef.current.length) {
           processQueue();
       }
+  };
+
+  const skipToNext = () => {
+    const currentTask = playQueueRef.current[queueIndexRef.current];
+    if (!currentTask) return;
+    
+    const currentSentenceIdx = currentTask.index;
+    const nextTaskIndex = playQueueRef.current.findIndex(t => t.index > currentSentenceIdx);
+    
+    if (nextTaskIndex !== -1) {
+       window.speechSynthesis.cancel();
+       if (timerRef.current) clearTimeout(timerRef.current);
+       if (watchdogRef.current) clearTimeout(watchdogRef.current);
+       queueIndexRef.current = nextTaskIndex;
+       setIsPaused(false);
+       processQueue();
+    }
+  };
+  
+  const skipToPrevious = () => {
+    const currentTask = playQueueRef.current[queueIndexRef.current];
+    if (!currentTask) return;
+    
+    const currentSentenceIdx = currentTask.index;
+    if (currentSentenceIdx === 0) {
+       window.speechSynthesis.cancel();
+       if (timerRef.current) clearTimeout(timerRef.current);
+       if (watchdogRef.current) clearTimeout(watchdogRef.current);
+       queueIndexRef.current = 0;
+       setIsPaused(false);
+       processQueue();
+       return;
+    }
+    
+    const prevTaskIndex = playQueueRef.current.findIndex(t => t.index === currentSentenceIdx - 1);
+    if (prevTaskIndex !== -1) {
+       window.speechSynthesis.cancel();
+       if (timerRef.current) clearTimeout(timerRef.current);
+       if (watchdogRef.current) clearTimeout(watchdogRef.current);
+       queueIndexRef.current = prevTaskIndex;
+       setIsPaused(false);
+       processQueue();
+    }
   };
 
   return (
@@ -366,18 +477,46 @@ export default function DictationPage() {
                 value={text}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value)}
               />
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="split-by-space" 
-                    checked={splitBySpace} 
-                    onCheckedChange={setSplitBySpace} 
-                  />
-                  <Label htmlFor="split-by-space">{t('dictation.split_by_space', '按空格分割单词')}</Label>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="split-by-space" 
+                      checked={splitBySpace} 
+                      onCheckedChange={setSplitBySpace} 
+                    />
+                    <Label htmlFor="split-by-space">{t('dictation.split_by_space', '按空格分割单词')}</Label>
+                  </div>
+                  <p className="text-xs text-gray-500 text-right">
+                    {text.length}/300
+                  </p>
                 </div>
-                <p className="text-xs text-gray-500 text-right">
-                  {text.length}/300
-                </p>
+                
+                {!splitBySpace && (
+                  <div className="flex items-center justify-between border-t pt-4">
+                    <div className="flex items-center space-x-2">
+                       <Switch id="smart-split" checked={useSmartSplit} onCheckedChange={setUseSmartSplit} />
+                       <div className="grid gap-1.5 leading-none">
+                          <Label htmlFor="smart-split">{t('dictation.smart_split', '智能分段')}</Label>
+                          <p className="text-xs text-muted-foreground">{t('dictation.smart_split_desc', '自动拆分长难句')}</p>
+                       </div>
+                    </div>
+                    
+                    {useSmartSplit && (
+                       <div className="flex items-center space-x-2 w-1/2">
+                          <Label className="text-xs whitespace-nowrap">{t('dictation.max_chars', '每句最大字数')}: {maxChunkLength}</Label>
+                          <Slider 
+                             value={[maxChunkLength]} 
+                             min={5} 
+                             max={50} 
+                             step={1} 
+                             onValueChange={(vals) => setMaxChunkLength(vals[0])} 
+                             className="flex-1"
+                          />
+                       </div>
+                    )}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -417,17 +556,24 @@ export default function DictationPage() {
               </CardContent>
             </Card>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
                {/* Controls */}
                <Button 
                  variant="outline" 
                  size="icon" 
-                 className="h-12 w-12 rounded-full"
-                 onClick={() => {
-                   stopPlayback();
-                 }}
+                 className="h-10 w-10 rounded-full"
+                 onClick={stopPlayback}
                >
-                 <Square className="h-5 w-5 fill-gray-600 text-gray-600" />
+                 <Square className="h-4 w-4 fill-gray-600 text-gray-600" />
+               </Button>
+
+               <Button 
+                 variant="outline" 
+                 size="icon" 
+                 className="h-12 w-12 rounded-full"
+                 onClick={skipToPrevious}
+               >
+                 <SkipBack className="h-5 w-5 text-gray-700" />
                </Button>
 
                <Button 
@@ -453,6 +599,15 @@ export default function DictationPage() {
                  variant="outline" 
                  size="icon" 
                  className="h-12 w-12 rounded-full"
+                 onClick={skipToNext}
+               >
+                 <SkipForward className="h-5 w-5 text-gray-700" />
+               </Button>
+
+               <Button 
+                 variant="outline" 
+                 size="icon" 
+                 className="h-10 w-10 rounded-full"
                  onClick={() => setHideText(!hideText)}
                >
                  {hideText ? "👁️" : "🙈"}
