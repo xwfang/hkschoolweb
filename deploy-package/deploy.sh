@@ -5,7 +5,7 @@
 # ==========================================
 
 # 默认配置
-DEFAULT_IP="150.109.69.62"
+DEFAULT_IP="101.47.72.93"
 REMOTE_USER="root"
 REMOTE_DIR="/opt/hkschoolweb"
 CONTAINER_NAME="hkschoolweb" # 需与 docker-compose.yml 中的 container_name 一致
