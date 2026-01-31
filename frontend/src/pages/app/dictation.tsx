@@ -284,7 +284,10 @@ export default function DictationPage() {
         }
     };
 
-    const handleEnd = () => {
+    const handleEnd = (fromWatchdog = false) => {
+      // Prevent double handling
+      if (!currentUtteranceRef.current) return;
+
       cleanup();
       // Finished speaking this item
       currentUtteranceRef.current = null;
@@ -292,7 +295,16 @@ export default function DictationPage() {
       // Move to next item
       queueIndexRef.current++;
       
+      // Check if we reached the end
+      if (queueIndexRef.current >= playQueueRef.current.length) {
+         setIsPlaying(false);
+         return;
+      }
+
       // Wait for interval
+      // If triggered by watchdog, we've already waited a long time, so reduce the interval
+      const waitTime = fromWatchdog ? 500 : (interval * 1000);
+
       timerRef.current = setTimeout(() => {
         // Check if we should continue (isPlaying might have been set to false by stop)
         if (queueIndexRef.current < playQueueRef.current.length) {
@@ -300,10 +312,10 @@ export default function DictationPage() {
         } else {
            setIsPlaying(false);
         }
-      }, interval * 1000);
+      }, waitTime);
     };
 
-    utterance.onend = handleEnd;
+    utterance.onend = () => handleEnd(false);
 
     utterance.onerror = (e) => {
         console.error("Speech error", e);
@@ -320,7 +332,7 @@ export default function DictationPage() {
     watchdogRef.current = setTimeout(() => {
         console.warn("Speech watchdog triggered - forcing next item");
         window.speechSynthesis.cancel(); // Force stop current
-        handleEnd();
+        handleEnd(true);
     }, estimatedDuration);
 
     window.speechSynthesis.speak(utterance);
