@@ -93,6 +93,8 @@ log_info "🔄 [3/4] 重启服务..."
 ssh $REMOTE_USER@$SERVER_IP "cd $REMOTE_DIR && \
     echo 'Stopping existing containers...' && \
     docker-compose down && \
+    echo 'Force removing potential conflict container...' && \
+    docker rm -f $CONTAINER_NAME 2>/dev/null || true && \
     echo 'Starting new containers...' && \
     docker-compose up -d"
 
