@@ -40,6 +40,7 @@ export default function DictationPage() {
   const [text, setText] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const isPausedRef = useRef(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [items, setItems] = useState<string[]>([]);
   
@@ -288,6 +289,14 @@ export default function DictationPage() {
       // Prevent double handling
       if (!currentUtteranceRef.current) return;
 
+      // If paused, just cleanup and return. 
+      // Do not advance queue or set timers.
+      if (isPausedRef.current) {
+          cleanup();
+          currentUtteranceRef.current = null;
+          return;
+      }
+
       cleanup();
       // Finished speaking this item
       currentUtteranceRef.current = null;
@@ -345,6 +354,7 @@ export default function DictationPage() {
     setItems(parsedItems);
     setIsPlaying(true);
     setIsPaused(false);
+    isPausedRef.current = false;
     
     // Ensure audio context is unlocked for mobile
     window.speechSynthesis.cancel();
@@ -377,6 +387,7 @@ export default function DictationPage() {
   const stopPlayback = () => {
     setIsPlaying(false);
     setIsPaused(false);
+    isPausedRef.current = false;
     window.speechSynthesis.cancel();
     if (timerRef.current) {
       clearTimeout(timerRef.current);
@@ -401,8 +412,10 @@ export default function DictationPage() {
   }, []);
 
   const pausePlayback = () => {
-    window.speechSynthesis.pause();
+    // Use cancel() instead of pause() for better reliability across browsers
+    window.speechSynthesis.cancel();
     setIsPaused(true);
+    isPausedRef.current = true;
     if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
@@ -414,11 +427,11 @@ export default function DictationPage() {
   };
 
   const resumePlayback = () => {
-      window.speechSynthesis.resume();
+      // Use processQueue() instead of resume() to restart the current item fresh
+      // This avoids bugs where resume() fails to speak or gets stuck
       setIsPaused(false);
-      if (!window.speechSynthesis.speaking && queueIndexRef.current < playQueueRef.current.length) {
-          processQueue();
-      }
+      isPausedRef.current = false;
+      processQueue();
   };
 
   const skipToNext = () => {
@@ -434,6 +447,7 @@ export default function DictationPage() {
        if (watchdogRef.current) clearTimeout(watchdogRef.current);
        queueIndexRef.current = nextTaskIndex;
        setIsPaused(false);
+       isPausedRef.current = false;
        processQueue();
     }
   };
@@ -449,6 +463,7 @@ export default function DictationPage() {
        if (watchdogRef.current) clearTimeout(watchdogRef.current);
        queueIndexRef.current = 0;
        setIsPaused(false);
+       isPausedRef.current = false;
        processQueue();
        return;
     }
@@ -460,6 +475,7 @@ export default function DictationPage() {
        if (watchdogRef.current) clearTimeout(watchdogRef.current);
        queueIndexRef.current = prevTaskIndex;
        setIsPaused(false);
+       isPausedRef.current = false;
        processQueue();
     }
   };
