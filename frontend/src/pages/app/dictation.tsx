@@ -53,7 +53,7 @@ export default function DictationPage() {
   const [hideText, setHideText] = useState(true);
   const [splitBySpace, setSplitBySpace] = useState(() => localStorage.getItem('dictation_splitBySpace') === 'true');
   const [useSmartSplit, setUseSmartSplit] = useState(() => localStorage.getItem('dictation_useSmartSplit') !== 'false'); // Default true
-  const [maxChunkLength, setMaxChunkLength] = useState(() => getStoredSetting('maxChunkLength', 15));
+  const [maxChunkLength, setMaxChunkLength] = useState(() => getStoredSetting('maxChunkLength', 12));
 
   // Save settings when they change
   useEffect(() => {
@@ -535,8 +535,8 @@ export default function DictationPage() {
                           <Label className="text-xs whitespace-nowrap">{t('dictation.max_chars', '每句最大字数')}: {maxChunkLength}</Label>
                           <Slider 
                              value={[maxChunkLength]} 
-                             min={5} 
-                             max={50} 
+                             min={10} 
+                             max={18} 
                              step={1} 
                              onValueChange={(vals) => setMaxChunkLength(vals[0])} 
                              className="flex-1"
